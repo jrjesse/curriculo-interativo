@@ -1,18 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" id="html-lang">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currículo Interativo | Jessé de Vasconcelos Júnior</title>
+    <title data-translate="page_title">Currículo Interativo | Jessé de Vasconcelos Júnior</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
-    <!-- Application Structure Plan: A single-page dashboard layout. It starts with a summary, followed by a visual chart of core skills. The main feature is an interactive vertical timeline of professional experience, where clicking an item reveals details in an adjacent panel. This is followed by a filterable, detailed grid of all technical skills and concludes with education. This structure allows for both a quick overview and a deep dive, enhancing usability for recruiters. -->
-    <!-- Visualization & Content Choices: 1. Core Skills: Goal -> Compare proficiency; Method -> Horizontal Bar Chart (Chart.js) to quantitatively represent years of experience per domain. Interaction -> Hover tooltips. Justification -> Clear, immediate comparison of strengths. 2. Experience: Goal -> Show career progression; Method -> Interactive HTML/CSS Timeline. Interaction -> Click to show details. Justification -> Intuitive chronological view without initial information overload. 3. All Skills: Goal -> Organize and allow lookup; Method -> Filterable HTML tags. Interaction -> Live search/filter. Justification -> Provides exhaustive detail with high usability. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -60,38 +56,48 @@
         .modal-content {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
+        .lang-btn.active {
+            background-color: #0891b2; /* cyan-600 */
+            color: white;
+        }
     </style>
 </head>
 <body class="antialiased">
 
     <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-40 shadow-sm">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl md:text-3xl font-bold tracking-wider text-slate-900">JESSÉ DE VASCONCELOS JÚNIOR</h1>
-            <div class="hidden md:flex space-x-6">
-                <a href="#sobre" class="text-slate-600 hover:text-cyan-600 transition">Sobre</a>
-                <a href="#habilidades" class="text-slate-600 hover:text-cyan-600 transition">Habilidades</a>
-                <a href="#experiencia" class="text-slate-600 hover:text-cyan-600 transition">Experiência</a>
-                <a href="#educacao" class="text-slate-600 hover:text-cyan-600 transition">Educação</a>
+            <h1 class="text-xl md:text-2xl font-bold tracking-wider text-slate-900">JESSÉ DE VASCONCELOS JÚNIOR</h1>
+            <div class="flex items-center space-x-6">
+                 <div class="hidden md:flex space-x-6">
+                    <a href="#sobre" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_about">Sobre</a>
+                    <a href="#habilidades" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_skills">Habilidades</a>
+                    <a href="#experiencia" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_experience">Experiência</a>
+                    <a href="#educacao" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_education">Educação</a>
+                </div>
+                <div class="flex border border-slate-200 rounded-lg p-1">
+                    <button id="lang-pt" class="lang-btn px-3 py-1 text-sm font-semibold rounded-md transition-colors" data-lang="pt">PT</button>
+                    <button id="lang-en" class="lang-btn px-3 py-1 text-sm font-semibold rounded-md transition-colors" data-lang="en">EN</button>
+                </div>
             </div>
         </nav>
     </header>
 
     <main class="container mx-auto px-6 py-12">
         <section id="sobre" class="text-center mb-24">
-            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">Engenheiro de Software Sênior</h2>
-            <p class="max-w-3xl mx-auto text-lg text-slate-600 mb-8">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4" data-translate="main_headline">Engenheiro de Software Sênior</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600 mb-8" data-translate="about_paragraph">
                 Engenheiro de Software com mais de 20 anos de experiência, especializado em arquitetura de sistemas e engenharia e análise de dados, desenvolvimento e sustentação, com forte atuação nos setores de Varejo, Indústria e Sistema Financeiro. Proficiência em gestão de equipes ágeis, integração de produtos e gestão de fornecedores. Experiência comprovada em migração para Cloud (AWS, Azure, OCI) e adoção de novas tecnologias. Adaptabilidade e comunicação eficazes, com foco em gerenciamento de projetos (Scrum, PMI) e gestão de tempo. Capacidade de desenvolver e capacitar membros da equipe através de contratação, treinamentos e feedbacks 1:1, alinhando profissionais aos objetivos técnicos da corporação.
             </p>
             <div class="flex justify-center space-x-4">
-                <button id="contact-btn" class="bg-cyan-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-cyan-700 transition">Entrar em Contato</button>
-                <a href="https://www.linkedin.com/in/jesse-vasconcelos-37127816/" target="_blank" class="bg-white text-slate-700 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-slate-100 transition">Ver LinkedIn</a>
+                <button id="contact-btn" class="bg-cyan-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-cyan-700 transition" data-translate="contact_btn">Entrar em Contato</button>
+                <a href="https://www.linkedin.com/in/jesse-vasconcelos-37127816/" target="_blank" class="bg-white text-slate-700 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-slate-100 transition" data-translate="linkedin_btn">Ver LinkedIn</a>
             </div>
         </section>
         
         <section id="habilidades" class="mb-24">
             <div class="text-center mb-12">
-                <h3 class="text-3xl font-bold text-slate-900 mb-2">Habilidades Principais</h3>
-                <p class="text-slate-600">Uma visão geral dos anos de experiência por área de especialização.</p>
+                <h3 class="text-3xl font-bold text-slate-900 mb-2" data-translate="core_skills_title">Habilidades Principais</h3>
+                <p class="text-slate-600" data-translate="core_skills_subtitle">Uma visão geral dos anos de experiência por área de especialização.</p>
             </div>
             <div class="chart-container">
                 <canvas id="skillsChart"></canvas>
@@ -100,66 +106,61 @@
 
         <section id="experiencia" class="mb-24">
             <div class="text-center mb-16">
-                <h3 class="text-3xl font-bold text-slate-900 mb-2">Linha do Tempo Profissional</h3>
-                <p class="text-slate-600">Clique em uma experiência para ver os detalhes.</p>
+                <h3 class="text-3xl font-bold text-slate-900 mb-2" data-translate="experience_title">Linha do Tempo Profissional</h3>
+                <p class="text-slate-600" data-translate="experience_subtitle">Clique em uma experiência para ver os detalhes.</p>
             </div>
             <div class="md:grid md:grid-cols-2 md:gap-16">
                 <div class="relative">
-                    <div id="timeline-container" class="space-y-10">
-                    </div>
+                    <div id="timeline-container" class="space-y-10"></div>
                 </div>
                 <div id="experience-details" class="mt-12 md:mt-0 sticky top-24 h-fit bg-white p-8 rounded-xl shadow-lg border border-slate-200/50 hidden md:block">
-                     <p class="text-center text-slate-500">Selecione uma posição na linha do tempo para ver os detalhes aqui.</p>
+                     <p class="text-center text-slate-500" data-translate="experience_placeholder">Selecione uma posição na linha do tempo para ver os detalhes aqui.</p>
                 </div>
             </div>
         </section>
 
         <section id="competencias-detalhe" class="mb-24">
             <div class="text-center mb-12">
-                <h3 class="text-3xl font-bold text-slate-900 mb-2">Competências em Detalhe</h3>
-                <p class="text-slate-600 mb-6">Explore o conjunto completo de tecnologias e ferramentas.</p>
-                <input type="search" id="skill-search" placeholder="Buscar tecnologia (ex: Java, AWS, React...)" class="w-full max-w-lg mx-auto p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
+                <h3 class="text-3xl font-bold text-slate-900 mb-2" data-translate="all_skills_title">Competências em Detalhe</h3>
+                <p class="text-slate-600 mb-6" data-translate="all_skills_subtitle">Explore o conjunto completo de tecnologias e ferramentas.</p>
+                <input type="search" id="skill-search" class="w-full max-w-lg mx-auto p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-cyan-500 focus:outline-none transition" data-translate-placeholder="skill_search_placeholder">
             </div>
-            <div id="skills-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            </div>
+            <div id="skills-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
         </section>
 
         <section id="educacao" class="bg-white p-12 rounded-xl shadow-lg border border-slate-200/50">
              <div class="grid md:grid-cols-2 gap-x-8 gap-y-12">
-                <!-- Coluna Formação Acadêmica -->
                 <div class="md:col-span-1">
-                    <h3 class="text-3xl font-bold text-slate-900 mb-8 text-center md:text-left">Formação Acadêmica</h3>
+                    <h3 class="text-3xl font-bold text-slate-900 mb-8 text-center md:text-left" data-translate="education_title">Formação Acadêmica</h3>
                     <div class="space-y-6">
                         <div>
-                            <h4 class="text-lg font-semibold text-cyan-700">Pós-Graduação em Engenharia e Análise de Dados e IA</h4>
+                            <h4 class="text-lg font-semibold text-cyan-700" data-translate="postgrad_title">Pós-Graduação em Engenharia e Análise de Dados e IA</h4>
                             <p class="text-slate-600">Cesar School</p>
-                            <p class="text-slate-500 text-sm">Previsão de conclusão: 2026</p>
+                            <p class="text-slate-500 text-sm" data-translate="postgrad_date">Previsão de conclusão: 2026</p>
                         </div>
                         <div>
-                            <h4 class="text-lg font-semibold text-cyan-700">Bacharel em Ciência da Computação</h4>
+                            <h4 class="text-lg font-semibold text-cyan-700" data-translate="grad_title">Bacharel em Ciência da Computação</h4>
                             <p class="text-slate-600">UNICAP</p>
-                            <p class="text-slate-500 text-sm">Concluído em 2007</p>
+                            <p class="text-slate-500 text-sm" data-translate="grad_date">Concluído em 2007</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Coluna Idiomas -->
                 <div class="md:col-span-1">
-                    <h3 class="text-3xl font-bold text-slate-900 mb-8 text-center md:text-left">Idiomas</h3>
+                    <h3 class="text-3xl font-bold text-slate-900 mb-8 text-center md:text-left" data-translate="languages_title">Idiomas</h3>
                     <div>
-                         <h4 class="text-lg font-semibold text-cyan-700 mb-3">Inglês - Nível B2 (Intermediário Superior)</h4>
+                         <h4 class="text-lg font-semibold text-cyan-700 mb-3" data-translate="english_level">Inglês - Nível B2 (Intermediário Superior)</h4>
                          <div class="grid grid-cols-3 gap-4 text-center">
                              <div class="bg-slate-50 p-3 rounded-lg">
-                                 <p class="font-semibold text-slate-800">Leitura</p>
-                                 <p class="text-slate-600">Avançado</p>
+                                 <p class="font-semibold text-slate-800" data-translate="reading_skill">Leitura</p>
+                                 <p class="text-slate-600" data-translate="advanced_level">Avançado</p>
                              </div>
                               <div class="bg-slate-50 p-3 rounded-lg">
-                                 <p class="font-semibold text-slate-800">Escrita</p>
-                                 <p class="text-slate-600">Intermediário</p>
+                                 <p class="font-semibold text-slate-800" data-translate="writing_skill">Escrita</p>
+                                 <p class="text-slate-600" data-translate="intermediate_level">Intermediário</p>
                              </div>
                               <div class="bg-slate-50 p-3 rounded-lg">
-                                 <p class="font-semibold text-slate-800">Escuta</p>
-                                 <p class="text-slate-600">Avançado</p>
+                                 <p class="font-semibold text-slate-800" data-translate="listening_skill">Escuta</p>
+                                 <p class="text-slate-600" data-translate="advanced_level_2">Avançado</p>
                              </div>
                          </div>
                     </div>
@@ -169,7 +170,7 @@
     </main>
 
     <footer class="text-center py-8 mt-16 border-t border-slate-200">
-        <p class="text-slate-500">&copy; 2024 JESSÉ DE VASCONCELOS JÚNIOR. Todos os direitos reservados.</p>
+        <p class="text-slate-500" data-translate="footer_text">&copy; 2024 JESSÉ DE VASCONCELOS JÚNIOR. Todos os direitos reservados.</p>
     </footer>
 
     <!-- Contact Modal -->
@@ -179,17 +180,17 @@
             <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Opções de Contato</h3>
+            <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center" data-translate="modal_title">Opções de Contato</h3>
             <div class="space-y-4">
                 <a href="https://wa.me/5581992063389" target="_blank" class="flex items-center w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition group">
                     <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52s-.67-.816-.917-1.116c-.247-.297-.494-.359-.67-.366-.176 0-.371-.025-.57-.025-.198 0-.52.075-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-                    <span>WhatsApp: +55 (81) 99206-3389</span>
+                    <span data-translate="whatsapp_contact">WhatsApp: +55 (81) 99206-3389</span>
                 </a>
                 <a href="mailto:jr.jesse@gmail.com" class="flex items-center w-full bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-cyan-700 transition group">
-                    <svg class="w-6 h-6 mr-3" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                     </svg>
-                    <span>E-mail: jr.jesse@gmail.com</span>
+                    <span data-translate="email_contact">E-mail: jr.jesse@gmail.com</span>
                 </a>
             </div>
         </div>
@@ -199,221 +200,382 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Contact Modal Logic ---
-    const contactBtn = document.getElementById('contact-btn');
-    const contactModal = document.getElementById('contact-modal');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const modalBackdrop = document.getElementById('modal-backdrop');
-    const modalContent = document.getElementById('modal-content');
+    let currentLang = 'pt';
+    let skillsChart; 
+    let selectedExperienceId = null;
 
-    const openModal = () => {
-        contactModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        // Trigger transition
-        setTimeout(() => {
-            modalBackdrop.classList.remove('opacity-0');
-            modalContent.classList.remove('opacity-0', 'scale-95');
-        }, 10);
+    // --- Data with Translations ---
+    const translations = {
+        pt: {
+            page_title: "Currículo Interativo | Jessé de Vasconcelos Júnior",
+            nav_about: "Sobre",
+            nav_skills: "Habilidades",
+            nav_experience: "Experiência",
+            nav_education: "Educação",
+            main_headline: "Engenheiro de Software Sênior",
+            about_paragraph: "Engenheiro de Software com mais de 20 anos de experiência, especializado em arquitetura de sistemas e engenharia e análise de dados, desenvolvimento e sustentação, com forte atuação nos setores de Varejo, Indústria e Sistema Financeiro. Proficiência em gestão de equipes ágeis, integração de produtos e gestão de fornecedores. Experiência comprovada em migração para Cloud (AWS, Azure, OCI) e adoção de novas tecnologias. Adaptabilidade e comunicação eficazes, com foco em gerenciamento de projetos (Scrum, PMI) e gestão de tempo. Capacidade de desenvolver e capacitar membros da equipe através de contratação, treinamentos e feedbacks 1:1, alinhando profissionais aos objetivos técnicos da corporação.",
+            contact_btn: "Entrar em Contato",
+            linkedin_btn: "Ver LinkedIn",
+            core_skills_title: "Habilidades Principais",
+            core_skills_subtitle: "Uma visão geral dos anos de experiência por área de especialização.",
+            chart_label: "Anos de Experiência (aprox.)",
+            chart_categories: ['Banco de Dados', 'Back-end', 'Metodologias & Ferramentas', 'Front-end', 'Cloud & DevOps', 'Analytics'],
+            experience_title: "Linha do Tempo Profissional",
+            experience_subtitle: "Clique em uma experiência para ver os detalhes.",
+            experience_placeholder: "Selecione uma posição na linha do tempo para ver os detalhes aqui.",
+            tech_label: "Tecnologias:",
+            all_skills_title: "Competências em Detalhe",
+            all_skills_subtitle: "Explore o conjunto completo de tecnologias e ferramentas.",
+            skill_search_placeholder: "Buscar tecnologia (ex: Java, AWS, React...)",
+            education_title: "Formação Acadêmica",
+            postgrad_title: "Pós-Graduação em Engenharia e Análise de Dados e IA",
+            postgrad_date: "Previsão de conclusão: 2026",
+            grad_title: "Bacharel em Ciência da Computação",
+            grad_date: "Concluído em 2007",
+            languages_title: "Idiomas",
+            english_level: "Inglês - Nível B2 (Intermediário Superior)",
+            reading_skill: "Leitura",
+            writing_skill: "Escrita",
+            listening_skill: "Escuta",
+            advanced_level: "Avançado",
+            intermediate_level: "Intermediário",
+            advanced_level_2: "Avançado",
+            footer_text: "© 2024 JESSÉ DE VASCONCELOS JÚNIOR. Todos os direitos reservados.",
+            modal_title: "Opções de Contato",
+            whatsapp_contact: "WhatsApp: +55 (81) 99206-3389",
+            email_contact: "E-mail: jr.jesse@gmail.com"
+        },
+        en: {
+            page_title: "Interactive Resume | Jessé de Vasconcelos Júnior",
+            nav_about: "About",
+            nav_skills: "Skills",
+            nav_experience: "Experience",
+            nav_education: "Education",
+            main_headline: "Senior Software Engineer",
+            about_paragraph: "Software Engineer with over 20 years of experience, specializing in systems architecture, data engineering and analysis, development, and support, with a strong background in Retail, Industry, and Financial Systems sectors. Proficient in agile team management, product integration, and vendor management. Proven experience in cloud migration (AWS, Azure, OCI) and adoption of new technologies. Effective adaptability and communication, with a focus on project management (Scrum, PMI) and time management. Ability to develop and train team members through hiring, training, and 1:1 feedback, aligning professionals with the corporation's technical objectives.",
+            contact_btn: "Contact Me",
+            linkedin_btn: "View LinkedIn",
+            core_skills_title: "Core Skills",
+            core_skills_subtitle: "An overview of years of experience by area of expertise.",
+            chart_label: "Years of Experience (approx.)",
+            chart_categories: ['Database', 'Back-end', 'Methodologies & Tools', 'Front-end', 'Cloud & DevOps', 'Analytics'],
+            experience_title: "Professional Timeline",
+            experience_subtitle: "Click on an experience to see the details.",
+            experience_placeholder: "Select a position on the timeline to see the details here.",
+            tech_label: "Technologies:",
+            all_skills_title: "Detailed Competencies",
+            all_skills_subtitle: "Explore the complete set of technologies and tools.",
+            skill_search_placeholder: "Search for a technology (e.g., Java, AWS, React...)",
+            education_title: "Education",
+            postgrad_title: "Postgraduate in Data Engineering and Analysis and AI",
+            postgrad_date: "Expected completion: 2026",
+            grad_title: "Bachelor of Computer Science",
+            grad_date: "Completed in 2007",
+            languages_title: "Languages",
+            english_level: "English - B2 Level (Upper-Intermediate)",
+            reading_skill: "Reading",
+            writing_skill: "Writing",
+            listening_skill: "Listening",
+            advanced_level: "Advanced",
+            intermediate_level: "Intermediate",
+            advanced_level_2: "Advanced",
+            footer_text: "© 2024 JESSÉ DE VASCONCELOS JÚNIOR. All rights reserved.",
+            modal_title: "Contact Options",
+            whatsapp_contact: "WhatsApp: +55 (81) 99206-3389",
+            email_contact: "Email: jr.jesse@gmail.com"
+        }
     };
-
-    const closeModal = () => {
-        modalBackdrop.classList.add('opacity-0');
-        modalContent.classList.add('opacity-0', 'scale-95');
-        // Wait for transition to finish before hiding
-        setTimeout(() => {
-            contactModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }, 300); // Should match transition duration
-    };
-
-    contactBtn.addEventListener('click', openModal);
-    closeModalBtn.addEventListener('click', closeModal);
-    modalBackdrop.addEventListener('click', closeModal);
 
     const experienceData = [
-        {
+       {
             id: 'copel',
-            role: 'Analista de Sistemas Sênior',
+            role: { pt: 'Analista de Sistemas Sênior', en: 'Senior Systems Analyst' },
             company: 'COPEL',
             period: '11/2024 - no momento',
-            description: [
-                'Suporte e Melhoria Contínua do Sistema PAVe, plataforma para prestadores de serviços e suporte ao atendimento a clientes Copel, integrando um fluxo com mais de 500 bots.',
-                'Análise de requisitos, diagnóstico de incidentes (Nível 2/3), e desenvolvimento de soluções para evoluções e melhorias no sistema PAVe.',
-                'Otimização de processos de negócio, identificação de gargalos e evolução do sistema PAVe para garantir eficiência, performance e satisfação dos usuários.'
-            ],
+            description: {
+                pt: [
+                    'Suporte e Melhoria Contínua do Sistema PAVe, plataforma para prestadores de serviços e suporte ao atendimento a clientes Copel, integrando um fluxo com mais de 500 bots.',
+                    'Análise de requisitos, diagnóstico de incidentes (Nível 2/3), e desenvolvimento de soluções para evoluções e melhorias no sistema PAVe.',
+                    'Otimização de processos de negócio, identificação de gargalos e evolução do sistema PAVe para garantir eficiência, performance e satisfação dos usuários.'
+                ],
+                en: [
+                    'Support and Continuous Improvement of the PAVe System, a platform for service providers and customer support for Copel clients, integrating a workflow with over 500 bots.',
+                    'Requirements analysis, incident diagnosis (Level 2/3), and development of solutions for evolutions and improvements in the PAVe system.',
+                    'Optimization of business processes, identification of bottlenecks, and evolution of the PAVe system to ensure efficiency, performance, and user satisfaction.'
+                ]
+            },
             tech: ['AMS', 'JAVA 7+', 'JSF', 'XHTML', 'IntelliJ', 'Object-oriented design', 'maven', 'Jboss', 'Openshift', 'Python', 'Dynatrace']
         },
         {
             id: 'bradesco',
-            role: 'TechLead',
+            role: { pt: 'TechLead', en: 'Tech Lead' },
             company: 'Bradesco',
             period: '01/2024 - 10/2024',
-            description: [
-                'Liderança técnica de equipe de 5 engenheiros de software Java, focada na concepção e implementação de um sistema de reprocessamento para contas PJ.',
-                'Definição da arquitetura de software visando baixa latência e alta performance, utilizando Spring Batch para processamento assíncrono.',
-                'Desenvolvimento e otimização de pipelines de dados (ETL), melhorando a eficiência de queries SQL.',
-                'Implementação de soluções com Databricks (Python, Pandas, Numpy) para automação de processos de investimento PJ.',
-                'Aplicação de DDD e Arquitetura Hexagonal para garantir escalabilidade e manutenção das soluções.',
-                'Utilização de Jira, Bitbucket e esteira de CI/CD (Bamboo/Nexus/SonarQube) para gestão e qualidade.',
-                'Documentação e modelagem de artefatos técnicos.'
-            ],
+            description: {
+                pt: [
+                    'Liderança técnica de equipe de 5 engenheiros de software Java, focada na concepção e implementação de um sistema de reprocessamento para contas PJ.',
+                    'Definição da arquitetura de software visando baixa latência e alta performance, utilizando Spring Batch para processamento assíncrono.',
+                    'Desenvolvimento e otimização de pipelines de dados (ETL), melhorando a eficiência de queries SQL.',
+                    'Implementação de soluções com Databricks (Python, Pandas, Numpy) para automação de processos de investimento PJ.',
+                    'Aplicação de DDD e Arquitetura Hexagonal para garantir escalabilidade e manutenção das soluções.',
+                    'Utilização de Jira, Bitbucket e esteira de CI/CD (Bamboo/Nexus/SonarQube) para gestão e qualidade.',
+                    'Documentação e modelagem de artefatos técnicos.'
+                ],
+                en: [
+                    'Technical leadership of a team of 5 Java software engineers, focused on designing and implementing a reprocessing system for corporate accounts.',
+                    'Defined software architecture for low latency and high performance, using Spring Batch for asynchronous processing.',
+                    'Developed and optimized ETL data pipelines, improving SQL query efficiency.',
+                    'Implemented solutions with Databricks (Python, Pandas, Numpy) to automate corporate investment processes.',
+                    'Applied DDD and Hexagonal Architecture to ensure scalability and maintainability of solutions.',
+                    'Used Jira, Bitbucket, and CI/CD pipeline (Bamboo/Nexus/SonarQube) for management and quality.',
+                    'Documented and modeled technical artifacts.'
+                ]
+            },
             tech: ['Java 7+', 'Spring', 'Spring Batch', 'NodeJs', 'JUnit', 'Bitbucket', 'Jira', 'Nexus', 'Bamboo', 'SonarQube', 'Confluence', 'Python', 'SQL', 'NoSQL', 'Azure Function', 'Databricks', 'Pandas', 'Numpy', 'DDD', 'Arquitetura Hexagonal', 'Drawio']
         },
-        {
+         {
             id: 'ism',
-            role: 'Engenheiro de software',
+            role: { pt: 'Engenheiro de software', en: 'Software Engineer' },
             company: 'ISM Tecnologia',
             period: '02/2022 - 10/2023',
-            description: [
-                'Suporte e Melhoria Contínua de sistemas de governança, gestão pública, contratos e auditoria para clientes como DETRANs e CREA-SP.',
-                'Análise de requisitos, diagnóstico de incidentes (Nível 2/3), e desenvolvimento de soluções para evoluções e melhorias nos sistemas.'
-            ],
+            description: {
+                pt: [
+                    'Suporte e Melhoria Contínua de sistemas de governança, gestão pública, contratos e auditoria para clientes como DETRANs e CREA-SP.',
+                    'Análise de requisitos, diagnóstico de incidentes (Nível 2/3), e desenvolvimento de soluções para evoluções e melhorias nos sistemas.'
+                ],
+                en: [
+                    'Support and Continuous Improvement of governance, public management, contracts, and audit systems for clients such as DETRANs and CREA-SP.',
+                    'Requirements analysis, incident diagnosis (Level 2/3), and development of solutions for system evolutions and improvements.'
+                ]
+            },
             tech: ['JAVA 7', 'JSF', 'XHTML', 'IntelliJ', 'Object-oriented design', 'maven', 'Jboss']
         },
         {
             id: 'sambatech',
-            role: 'TechLead',
+            role: { pt: 'TechLead', en: 'Tech Lead' },
             company: 'Sambatech',
             period: '02/2023 – 12/2023',
-            description: [
-                'Analisei a viabilidade e gerenciei a migração do sistema de streaming de vídeo da AWS para OCI, administrando negociações com fornecedores (Oracle, Dedalus, Bitmovin) para otimizar arquitetura e reduzir custos em 65%.',
-                'Recrutei e gerenciei equipe de desenvolvedores, garantindo adesão a padrões de codificação, revisão de código e práticas de desenvolvimento seguro, promovendo inovação e colaboração multifuncional.'
-            ],
+            description: {
+                pt: [
+                    'Analisei a viabilidade e gerenciei a migração do sistema de streaming de vídeo da AWS para OCI, administrando negociações com fornecedores (Oracle, Dedalus, Bitmovin) para otimizar arquitetura e reduzir custos em 65%.',
+                    'Recrutei e gerenciei equipe de desenvolvedores, garantindo adesão a padrões de codificação, revisão de código e práticas de desenvolvimento seguro, promovendo inovação e colaboração multifuncional.'
+                ],
+                en: [
+                    'Analyzed viability and managed the migration of the video streaming system from AWS to OCI, handling negotiations with suppliers (Oracle, Dedalus, Bitmovin) to optimize architecture and reduce costs by 65%.',
+                    'Recruited and managed a team of developers, ensuring adherence to coding standards, code review, and secure development practices, promoting innovation and cross-functional collaboration.'
+                ]
+            },
             tech: ['Java7+', 'JSF', 'JavaScript', 'Object-oriented design', 'design patterns', 'AWS', 'Google Cloud Platform (GCP)', 'Bitmovin', 'Jira']
         },
         {
             id: 'petrobras',
-            role: 'TechLead - ServiceNow',
+            role: { pt: 'TechLead - ServiceNow', en: 'Tech Lead - ServiceNow' },
             company: 'Petrobrás',
             period: '02/2022 – 08/2023',
-            description: [
-                'Atuei como especialista em Service Now (ITSM, ITOM, AMS), implementando formulários automatizados e integrando interfaces via scripts.',
-                'Liderei a migração de um sistema legado com 3500 formulários para os padrões da Service Now, em um projeto de escala global.',
-                'Desenvolvi aplicativos low-code e automações utilizando o App Engine.'
-            ],
+            description: {
+                pt: [
+                    'Atuei como especialista em Service Now (ITSM, ITOM, AMS), implementando formulários automatizados e integrando interfaces via scripts.',
+                    'Liderei a migração de um sistema legado com 3500 formulários para os padrões da Service Now, em um projeto de escala global.',
+                    'Desenvolvi aplicativos low-code e automações utilizando o App Engine.'
+                ],
+                en: [
+                    'Acted as a ServiceNow specialist (ITSM, ITOM, AMS), implementing automated forms and integrating interfaces via scripts.',
+                    'Led the migration of a legacy system with 3500 forms to ServiceNow standards in a global-scale project.',
+                    'Developed low-code applications and automations using the App Engine.'
+                ]
+            },
             tech: ['Service Now', 'ITIL4', 'Java', 'JavaScript', 'Object-oriented design', 'design patterns', 'performance/scale considerations']
         },
         {
             id: 'vale',
-            role: 'TechLead - SAP BPT',
+            role: { pt: 'TechLead - SAP BPT', en: 'Tech Lead - SAP BPT' },
             company: 'Vale',
             period: '01/2022 – 09/2022',
-            description: [
-                'Atuei como especialista em AMS(N2/3), resolvendo problemas e causas raiz para sistemas satélites com integração OData (SAP MM, FI).',
-                'Desenvolvi em Java 7+ com Spring, realizando ajustes de API e melhorias de frontend.',
-                'Melhorei processos internos interagindo com equipe ABAP offshore, englobando sistemas em Angular e Sap Integration Bot Quality (Azure Function).'
-            ],
+            description: {
+                pt: [
+                    'Atuei como especialista em AMS(N2/3), resolvendo problemas e causas raiz para sistemas satélites com integração OData (SAP MM, FI).',
+                    'Desenvolvi em Java 7+ com Spring, realizando ajustes de API e melhorias de frontend.',
+                    'Melhorei processos internos interagindo com equipe ABAP offshore, englobando sistemas em Angular e Sap Integration Bot Quality (Azure Function).'
+                ],
+                en: [
+                    'Acted as an AMS (L2/3) specialist, resolving issues and root causes for satellite systems with OData integration (SAP MM, FI).',
+                    'Developed in Java 7+ with Spring, making API adjustments and frontend improvements.',
+                    'Improved internal processes by interacting with an offshore ABAP team, covering systems in Angular and Sap Integration Bot Quality (Azure Function).'
+                ]
+            },
             tech: ['UI5', 'BPT', 'Hana', 'SCP', 'ODATA', 'ABAP', 'AZURE Function', 'SonarQube']
         },
         {
             id: 'itau',
-            role: 'Senior System Engineer',
+            role: { pt: 'Senior System Engineer', en: 'Senior System Engineer' },
             company: 'ITAU Unibanco',
             period: '09/2021 – 01/2022',
-            description: [
-                'Gerenciei incidentes e resolvi problemas para a jornada do canal PJ.',
-                'Desenvolvi Dashboards para monitoramento de aplicações e análise de logs, além de microserviços Backend com Java 8+.',
-                'Defini mecanismos e ferramentas para apoiar as equipes na implantação de projetos com qualidade e no prazo.'
-            ],
+            description: {
+                pt: [
+                    'Gerenciei incidentes e resolvi problemas para a jornada do canal PJ.',
+                    'Desenvolvi Dashboards para monitoramento de aplicações e análise de logs, além de microserviços Backend com Java 8+.',
+                    'Defini mecanismos e ferramentas para apoiar as equipes na implantação de projetos com qualidade e no prazo.'
+                ],
+                en: [
+                    'Managed incidents and resolved issues for the corporate channel journey.',
+                    'Developed dashboards for application monitoring and log analysis, as well as backend microservices with Java 8+.',
+                    'Defined mechanisms and tools to support teams in deploying projects with quality and on time.'
+                ]
+            },
             tech: ['Java 8+', 'Spring 4+', 'MVP', 'JBoss', 'Microservices', 'JUnit', 'Maven', 'Apache kafka', 'REST APIs', 'Docker', 'Jira Devops', 'AWS CodePipeline', 'AWS CodeDeploy', 'containers', 'NoSql', 'Redis', 'Angular JS']
         },
         {
             id: 'sankhya_jiva',
-            role: 'Desenvolvedor FullStack',
+            role: { pt: 'Desenvolvedor FullStack', en: 'Full-Stack Developer' },
             company: 'Sankhya JIVA Tecnologia',
             period: '03/2021 – 09/2021',
-            description: [
-                'Liderei a migração de plataforma Adobe Flex para Angular 8/9 e HTML5, utilizando o novo framework Sankhya.',
-                'Acompanhei o escopo, resolvi problemas e change requests, além de apoiar na definição de processos e recrutamento para a Solution Factory.',
-                'Desenvolvi endpoints integrados com Sankhya Om no módulo de vendas para o aplicativo de Força de Vendas.'
-            ],
+            description: {
+                pt: [
+                    'Liderei a migração de plataforma Adobe Flex para Angular 8/9 e HTML5, utilizando o novo framework Sankhya.',
+                    'Acompanhei o escopo, resolvi problemas e change requests, além de apoiar na definição de processos e recrutamento para a Solution Factory.',
+                    'Desenvolvi endpoints integrados com Sankhya Om no módulo de vendas para o aplicativo de Força de Vendas.'
+                ],
+                en: [
+                    'Led the migration of the Adobe Flex platform to Angular 8/9 and HTML5 using the new Sankhya framework.',
+                    'Monitored scope, resolved issues and change requests, and supported process definition and recruitment for the Solution Factory.',
+                    'Developed endpoints integrated with Sankhya Om in the sales module for the Sales Force application.'
+                ]
+            },
             tech: ['Scrum', 'MVP', 'Java 8+', 'Spring 4+', 'Apache kafka', 'JBoss', 'JUnit(Karate)', 'Maven', 'REST API', 'JSON', 'Devops', 'Containers', 'NoSql', 'Angular JS']
         },
         {
             id: 'sankhya_conceito',
-            role: 'Desenvolvedor FullStack',
+            role: { pt: 'Desenvolvedor FullStack', en: 'Full-Stack Developer' },
             company: 'Sankhya Conceito',
             period: '03/2020 – 03/2021',
-            description: [
-                'Migrei a plataforma Adobe Flex para Angular 8/9 e HTML5, utilizando o novo framework Sankhya.',
-                'Acompanhei o escopo, resolvi problemas e CRs, e apoiei na definição de processos e recrutamento para a Solution Factory.',
-                'Com conceitos de MVP, desenvolvi endpoints integrados com Sankhya Om no módulo de vendas.'
-            ],
+            description: {
+                pt: [
+                    'Migrei a plataforma Adobe Flex para Angular 8/9 e HTML5, utilizando o novo framework Sankhya.',
+                    'Acompanhei o escopo, resolvi problemas e CRs, e apoiei na definição de processos e recrutamento para a Solution Factory.',
+                    'Com conceitos de MVP, desenvolvi endpoints integrados com Sankhya Om no módulo de vendas.'
+                ],
+                en: [
+                    'Migrated the Adobe Flex platform to Angular 8/9 and HTML5 using the new Sankhya framework.',
+                    'Monitored scope, resolved issues and CRs, and supported process definition and recruitment for the Solution Factory.',
+                    'Using MVP concepts, I developed endpoints integrated with Sankhya Om in the sales module.'
+                ]
+            },
             tech: ['Angular 8/9', 'HTML5', 'JIRA', 'SQL Server', 'JAVA', 'Mobile', 'BFF', 'Micro Service', 'Scrum', 'MVP', 'Spring 4+', 'JBoss', 'JUnit(Karate)', 'REST API']
         },
         {
             id: 'gabos_grupobig',
-            role: 'Senior System Engineer',
+            role: { pt: 'Senior System Engineer', en: 'Senior System Engineer' },
             company: 'Gabos Soluções (serviço no Grupo Big)',
             period: '11/2018 – 09/2020',
-            description: [
-                'Participei do projeto SAD Rotinas de logística, migrando a plataforma Xseed para Inovation Java 7.',
-                'Transformei a arquitetura monolítica em microserviços através de uma nova estruturação (TBRUN, scheduler).',
-                'Realizei integração com sistema legado para automação logística via comando de voz.'
-            ],
+            description: {
+                pt: [
+                    'Participei do projeto SAD Rotinas de logística, migrando a plataforma Xseed para Inovation Java 7.',
+                    'Transformei a arquitetura monolítica em microserviços através de uma nova estruturação (TBRUN, scheduler).',
+                    'Realizei integração com sistema legado para automação logística via comando de voz.'
+                ],
+                en: [
+                    'Participated in the SAD Logistics Routines project, migrating the Xseed platform to Innovation Java 7.',
+                    'Transformed the monolithic architecture into microservices through a new structure (TBRUN, scheduler).',
+                    'Performed integration with a legacy system for logistics automation via voice command.'
+                ]
+            },
             tech: ['Xseed(Innovation)', 'Java 7+', 'VSCode', 'Github', 'Jira', 'Confluence', 'API Rest', 'pipeline CI/CD', 'DevOps']
         },
         {
             id: 'gabos_walmart',
-            role: 'Senior System Engineer / DBA',
+            role: { pt: 'Senior System Engineer / DBA', en: 'Senior System Engineer / DBA' },
             company: 'GABOS (serviço no Wal-Mart Br.)',
             period: '09/2016 – 09/2018',
-            description: [
-                'Realizei a migração do Oracle 10g Application Server para Weblogic 11g.',
-                'Compilei os Forms da aplicação de folha UNIVERSAL RH de 10g para 11g.',
-                'Acompanhei testes, reportei a gestores e articulei soluções com fornecedores (Oracle / Ação Sistemas).'
-            ],
+            description: {
+                pt: [
+                    'Realizei a migração do Oracle 10g Application Server para Weblogic 11g.',
+                    'Compilei os Forms da aplicação de folha UNIVERSAL RH de 10g para 11g.',
+                    'Acompanhei testes, reportei a gestores e articulei soluções com fornecedores (Oracle / Ação Sistemas).'
+                ],
+                en: [
+                    'Performed the migration of Oracle 10g Application Server to Weblogic 11g.',
+                    'Compiled the Forms of the UNIVERSAL RH payroll application from 10g to 11g.',
+                    'Monitored tests, reported to managers, and coordinated solutions with suppliers (Oracle / Ação Sistemas).'
+                ]
+            },
             tech: ['Weblogic 11g', 'Unix', 'Oracle 11g', 'Pl/Sql', 'Forms 11g', 'scripts batch']
         },
         {
             id: 'accenture_globo',
-            role: 'Senior System Engineer',
+            role: { pt: 'Senior System Engineer', en: 'Senior System Engineer' },
             company: 'Accenture do Brasil LTDA',
             period: '07/2015 – 05/2016',
-            description: [
-                'Atuei como analista de sistemas R12 no projeto de contratos (OKC) da Rede Globo e no projeto de gestão de apontamento frigorífico (OPM, Bloco K) do Grupo Edson Queiroz.',
-                'Realizei a migração do cadastro de fornecedores e apoiei no setup de fábrica Oracle EBS.',
-                'Realizei suporte N2 aos módulos (INV, AP, RI) e controle de versionamento com TFS.'
-            ],
+            description: {
+                pt: [
+                    'Atuei como analista de sistemas R12 no projeto de contratos (OKC) da Rede Globo e no projeto de gestão de apontamento frigorífico (OPM, Bloco K) do Grupo Edson Queiroz.',
+                    'Realizei a migração do cadastro de fornecedores e apoiei no setup de fábrica Oracle EBS.',
+                    'Realizei suporte N2 aos módulos (INV, AP, RI) e controle de versionamento com TFS.'
+                ],
+                en: [
+                    'Worked as an R12 systems analyst on the Rede Globo contracts project (OKC) and the Edson Queiroz Group refrigerated tracking management project (OPM, Block K).',
+                    'Performed supplier registration migration and supported the Oracle EBS factory setup.',
+                    'Provided L2 support for modules (INV, AP, RI) and version control with TFS.'
+                ]
+            },
             tech: ['Pl/Sql', 'Forms 10g', 'Dataload', 'BI Publisher', 'XML Publisher', 'UNIX', 'APIs', 'TFS']
         },
         {
             id: 'accenture_walmart',
-            role: 'Senior System Engineer',
+            role: { pt: 'Senior System Engineer', en: 'Senior System Engineer' },
             company: 'Accenture do Brasil LTDA',
             period: '04/2012 – 06/2015',
-            description: [
-                'Prestei suporte N2 e N3 aos sistemas legados do Wal-Mart Brasil, seguindo padrões ITIL.',
-                'Atuei nos sistemas de folha de pagamento (Universal RH), conciliação de cartões (SCE Auttar) e workflow de aprovação legado.',
-                'Realizei controle de versionamentos (SVN) para o sistema de logística legado.'
-            ],
+            description: {
+                pt: [
+                    'Prestei suporte N2 e N3 aos sistemas legados do Wal-Mart Brasil, seguindo padrões ITIL.',
+                    'Atuei nos sistemas de folha de pagamento (Universal RH), conciliação de cartões (SCE Auttar) e workflow de aprovação legado.',
+                    'Realizei controle de versionamentos (SVN) para o sistema de logística legado.'
+                ],
+                en: [
+                    'Provided L2 and L3 support for Wal-Mart Brazil\'s legacy systems, following ITIL standards.',
+                    'Worked on payroll systems (Universal RH), card reconciliation (SCE Auttar), and legacy approval workflow.',
+                    'Performed version control (SVN) for the legacy logistics system.'
+                ]
+            },
             tech: ['Pl/Sql', 'Forms 10g', 'Reports', 'APIs', 'Oracle Designer', 'Oracle Application Server 10g', 'SQL Server 2008', 'Tortoise SVN']
         },
         {
             id: 'swoti_walmart',
-            role: 'Fundador Consultor',
+            role: { pt: 'Fundador Consultor', en: 'Founder & Consultant' },
             company: 'SWOTI (serviço no Wal-Mart)',
             period: '08/2010 – 04/2012',
-            description: [
-                'Atuei como desenvolvedor e consultor para o sistema de folha de pagamento Universal RH da Ação Sistemas.',
-                'Realizei o batimento cadastral de mais de 75.000 associados para planos de saúde.',
-                'Desenvolvi e atualizei pacotes legais e customizados, além de relatórios complexos.'
-            ],
+            description: {
+                pt: [
+                    'Atuei como desenvolvedor e consultor para o sistema de folha de pagamento Universal RH da Ação Sistemas.',
+                    'Realizei o batimento cadastral de mais de 75.000 associados para planos de saúde.',
+                    'Desenvolvi e atualizei pacotes legais e customizados, além de relatórios complexos.'
+                ],
+                en: [
+                    'Worked as a developer and consultant for the Universal RH payroll system from Ação Sistemas.',
+                    'Performed cadastral reconciliation for over 75,000 members for health plans.',
+                    'Developed and updated legal and custom packages, as well as complex reports.'
+                ]
+            },
             tech: ['Pl/Sql', 'Forms 10g', 'Reports', 'APIs', 'Oracle Designer', 'Oracle Application Server 10g']
         },
         {
             id: 'apply_solutions',
-            role: 'Analista Programador',
+            role: { pt: 'Analista Programador', en: 'Programmer Analyst' },
             company: 'Apply Solutions Ltda.',
             period: '08/2006 – 08/2010',
-            description: [
-                'Desenvolvi em PL/SQL (packages, procedures, functions, triggers) no projeto Grupo Farias para Oracle EBS R11 (módulos OM, GL).',
-                'Realizei suporte e manutenção ao sistema integrado de vendas (SIV) no projeto Grupo João Santos.'
-            ],
+            description: {
+                pt: [
+                    'Desenvolvi em PL/SQL (packages, procedures, functions, triggers) no projeto Grupo Farias para Oracle EBS R11 (módulos OM, GL).',
+                    'Realizei suporte e manutenção ao sistema integrado de vendas (SIV) no projeto Grupo João Santos.'
+                ],
+                en: [
+                    'Developed in PL/SQL (packages, procedures, functions, triggers) on the Grupo Farias project for Oracle EBS R11 (OM, GL modules).',
+                    'Performed support and maintenance for the integrated sales system (SIV) on the Grupo João Santos project.'
+                ]
+            },
             tech: ['Oracle EBS', 'FI', 'Sql', 'Pl/Sql', 'Forms 6i', 'Reports']
         }
     ];
-
+    
     const allSkills = {
         'Back-end': ['Java 7+', 'Spring Boot', 'Microservices REST/RESTful', 'JDBC', 'ODBC', 'HTTP', 'XML/XSD/XSLT', 'Node.js', 'DDD', 'Arquitetura Hexagonal'],
         'Front-end': ['JavaScript', 'TypeScript', 'React', 'Angular', 'Elm', 'JSF', 'XHTML', 'HTML5', 'CSS3', 'Ajax', 'JSP (JSTL)'],
@@ -423,140 +585,199 @@ document.addEventListener('DOMContentLoaded', () => {
         'Metodologias & Ferramentas': ['Metodologias Ágeis', 'Scrum', 'MVP', 'Jira', 'Confluence', 'SonarQube', 'JUnit', 'Maven', 'Intellij IDE', 'Eclipse IDE', 'Drawio', 'Websphere', 'Jboss', 'Tomcat', 'Struts', 'Spring', 'Hibernate', 'Service Now', 'ITIL4', 'SAP Cloud SDK for Java UI5', 'BPT', 'ODATA', 'ABAP', 'TFS', 'SVN', 'Dynatrace']
     };
 
-    const skillsChartCtx = document.getElementById('skillsChart').getContext('2d');
-    new Chart(skillsChartCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Banco de Dados', 'Back-end', 'Metodologias & Ferramentas', 'Front-end', 'Cloud & DevOps', 'Analytics'],
-            datasets: [{
-                label: 'Anos de Experiência (aprox.)',
-                data: [20, 18, 15, 10, 8, 6], // Updated data to reflect 20+ years experience
-                backgroundColor: 'rgba(8, 145, 178, 0.7)',
-                borderColor: 'rgb(8, 145, 178)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            maintainAspectRatio: false,
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: '#1e293b',
-                    titleFont: { size: 14 },
-                    bodyFont: { size: 12 },
-                    padding: 10,
-                    cornerRadius: 4
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#475569',
-                        font: {
-                            size: 14
-                        }
-                    },
-                    grid: {
-                        display: false
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#475569'
-                    },
-                    grid: {
-                        color: '#e2e8f0'
-                    }
+
+    // --- Core Functions ---
+    const setLanguage = (lang) => {
+        currentLang = lang;
+        document.getElementById('html-lang').lang = lang === 'pt' ? 'pt-BR' : 'en';
+
+        // Translate all static text
+        document.querySelectorAll('[data-translate]').forEach(el => {
+            const key = el.dataset.translate;
+            if (translations[lang][key]) {
+                if(el.tagName === 'INPUT' && el.type === 'search') {
+                    el.placeholder = translations[lang][key];
+                } else {
+                    el.innerHTML = translations[lang][key];
                 }
             }
+        });
+        
+        // Update active button
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        // Re-render dynamic components
+        renderSkillsChart();
+        renderTimeline();
+        renderSkillsGrid();
+
+        // If an experience was selected, re-render its details
+        if(selectedExperienceId) {
+            renderExperienceDetails(selectedExperienceId);
         }
-    });
+    };
+    
+    // --- Render Functions ---
+    const renderTimeline = () => {
+        const timelineContainer = document.getElementById('timeline-container');
+        timelineContainer.innerHTML = '';
+        experienceData.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'timeline-item relative pl-8 pb-4 cursor-pointer';
+            div.dataset.id = item.id;
+            div.innerHTML = `
+                <div class="timeline-item-dot"></div>
+                <p class="text-sm text-slate-500">${item.period}</p>
+                <h4 class="font-bold text-slate-800">${item.role[currentLang]}</h4>
+                <p class="text-slate-600">${item.company}</p>
+            `;
+            timelineContainer.appendChild(div);
+        });
+        // Re-apply active state
+        if (selectedExperienceId) {
+             const activeItem = timelineContainer.querySelector(`[data-id="${selectedExperienceId}"]`);
+             if(activeItem) {
+                activeItem.querySelector('.timeline-item-dot').style.backgroundColor = '#0891b2';
+                activeItem.querySelector('h4').classList.add('text-cyan-600');
+             }
+        }
+    };
 
-    const timelineContainer = document.getElementById('timeline-container');
-    experienceData.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'timeline-item relative pl-8 pb-4 cursor-pointer';
-        div.dataset.id = item.id;
-        div.innerHTML = `
-            <div class="timeline-item-dot"></div>
-            <p class="text-sm text-slate-500">${item.period}</p>
-            <h4 class="font-bold text-slate-800">${item.role}</h4>
-            <p class="text-slate-600">${item.company}</p>
-        `;
-        timelineContainer.appendChild(div);
-    });
+    const renderExperienceDetails = (itemId) => {
+        selectedExperienceId = itemId;
+        const detailsPanel = document.getElementById('experience-details');
+        const data = experienceData.find(item => item.id === itemId);
 
-    const detailsPanel = document.getElementById('experience-details');
-    timelineContainer.addEventListener('click', (e) => {
+        if (data) {
+            detailsPanel.classList.remove('hidden');
+            detailsPanel.innerHTML = `
+                <h4 class="text-xl font-bold text-slate-900 mb-1">${data.role[currentLang]}</h4>
+                <p class="text-md font-semibold text-cyan-700 mb-1">${data.company}</p>
+                <p class="text-sm text-slate-500 mb-4">${data.period}</p>
+                <ul class="space-y-3 text-slate-600 list-disc list-inside mb-4">
+                    ${data.description[currentLang].map(d => `<li>${d}</li>`).join('')}
+                </ul>
+                <h5 class="font-semibold text-slate-800 mt-6 mb-2">${translations[currentLang].tech_label}</h5>
+                <div class="flex flex-wrap gap-2">
+                    ${data.tech.map(t => `<span class="bg-cyan-50 text-cyan-800 text-xs font-medium px-2.5 py-1 rounded-full">${t}</span>`).join('')}
+                </div>
+            `;
+        }
+    };
+    
+    const renderSkillsChart = () => {
+        const skillsChartCtx = document.getElementById('skillsChart').getContext('2d');
+        if (skillsChart) {
+            skillsChart.destroy();
+        }
+        skillsChart = new Chart(skillsChartCtx, {
+            type: 'bar',
+            data: {
+                labels: translations[currentLang].chart_categories,
+                datasets: [{
+                    label: translations[currentLang].chart_label,
+                    data: [20, 18, 15, 10, 8, 6],
+                    backgroundColor: 'rgba(8, 145, 178, 0.7)',
+                    borderColor: 'rgb(8, 145, 178)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { ticks: { color: '#475569', font: { size: 14 } }, grid: { display: false } },
+                    x: { ticks: { color: '#475569' }, grid: { color: '#e2e8f0' } }
+                }
+            }
+        });
+    };
+    
+    const renderSkillsGrid = () => {
+        const skillsGrid = document.getElementById('skills-grid');
+        skillsGrid.innerHTML = '';
+        Object.entries(allSkills).forEach(([category, skills]) => {
+            if(Array.isArray(skills)) {
+                skills.forEach(skill => {
+                    const skillDiv = document.createElement('div');
+                    skillDiv.className = 'skill-tag bg-white p-3 rounded-lg text-center shadow-sm hover:shadow-md hover:-translate-y-1 cursor-pointer';
+                    skillDiv.textContent = skill;
+                    skillsGrid.appendChild(skillDiv);
+                });
+            }
+        });
+    }
+
+    // --- Modal Logic ---
+    const contactBtn = document.getElementById('contact-btn');
+    const contactModal = document.getElementById('contact-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const modalContent = document.getElementById('modal-content');
+    const openModal = () => {
+        contactModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+            modalBackdrop.classList.remove('opacity-0');
+            modalContent.classList.remove('opacity-0', 'scale-95');
+        }, 10);
+    };
+    const closeModal = () => {
+        modalBackdrop.classList.add('opacity-0');
+        modalContent.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            contactModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }, 300);
+    };
+    contactBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+    // --- Event Listeners ---
+    document.getElementById('lang-pt').addEventListener('click', () => setLanguage('pt'));
+    document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+    
+    document.getElementById('timeline-container').addEventListener('click', (e) => {
         const itemElement = e.target.closest('.timeline-item');
         if (itemElement) {
-            // Remove active state from all items
             document.querySelectorAll('.timeline-item').forEach(el => {
                 el.querySelector('.timeline-item-dot').style.backgroundColor = '#f8fafc';
                 el.querySelector('h4').classList.remove('text-cyan-600');
             });
-            // Add active state to clicked item
             itemElement.querySelector('.timeline-item-dot').style.backgroundColor = '#0891b2';
             itemElement.querySelector('h4').classList.add('text-cyan-600');
-
-            const itemId = itemElement.dataset.id;
-            const data = experienceData.find(item => item.id === itemId);
-            if (data) {
-                detailsPanel.classList.remove('hidden');
-                detailsPanel.innerHTML = `
-                    <h4 class="text-xl font-bold text-slate-900 mb-1">${data.role}</h4>
-                    <p class="text-md font-semibold text-cyan-700 mb-1">${data.company}</p>
-                    <p class="text-sm text-slate-500 mb-4">${data.period}</p>
-                    <ul class="space-y-3 text-slate-600 list-disc list-inside mb-4">
-                        ${data.description.map(d => `<li>${d}</li>`).join('')}
-                    </ul>
-                    <h5 class="font-semibold text-slate-800 mt-6 mb-2">Tecnologias:</h5>
-                    <div class="flex flex-wrap gap-2">
-                        ${data.tech.map(t => `<span class="bg-cyan-50 text-cyan-800 text-xs font-medium px-2.5 py-1 rounded-full">${t}</span>`).join('')}
-                    </div>
-                `;
-                 // Scroll to details on mobile
-                if (window.innerWidth < 768) {
-                    detailsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+            
+            renderExperienceDetails(itemElement.dataset.id);
+            if (window.innerWidth < 768) {
+                document.getElementById('experience-details').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
     });
 
-    // Auto-select the first item on load
-    if (timelineContainer.firstElementChild) {
-        timelineContainer.firstElementChild.click();
-    }
-
-
-    const skillsGrid = document.getElementById('skills-grid');
-    Object.entries(allSkills).forEach(([category, skills]) => {
-        skills.forEach(skill => {
-            const skillDiv = document.createElement('div');
-            skillDiv.className = 'skill-tag bg-white p-3 rounded-lg text-center shadow-sm hover:shadow-md hover:-translate-y-1 cursor-pointer';
-            skillDiv.textContent = skill;
-            skillsGrid.appendChild(skillDiv);
-        });
-    });
-
-    const skillSearch = document.getElementById('skill-search');
-    skillSearch.addEventListener('input', (e) => {
+    document.getElementById('skill-search').addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
-        const allSkillTags = document.querySelectorAll('.skill-tag');
-        allSkillTags.forEach(tag => {
-            const skillName = tag.textContent.toLowerCase();
-            if (skillName.includes(searchTerm)) {
-                tag.style.display = 'block';
-            } else {
-                tag.style.display = 'none';
-            }
+        document.querySelectorAll('.skill-tag').forEach(tag => {
+            tag.style.display = tag.textContent.toLowerCase().includes(searchTerm) ? 'block' : 'none';
         });
     });
+
+    // --- Initial Load ---
+    setLanguage(currentLang); // Set default language
+    // Auto-select the first timeline item on load
+    if (experienceData.length > 0) {
+        selectedExperienceId = experienceData[0].id;
+        renderExperienceDetails(selectedExperienceId);
+        const firstTimelineItem = document.querySelector('.timeline-item');
+        if(firstTimelineItem) {
+            firstTimelineItem.querySelector('.timeline-item-dot').style.backgroundColor = '#0891b2';
+            firstTimelineItem.querySelector('h4').classList.add('text-cyan-600');
+        }
+    }
 });
 </script>
 </body>
