@@ -6,6 +6,7 @@
     <title data-translate="page_title">Currículo Interativo | Jessé de Vasconcelos Júnior</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -200,6 +201,54 @@
             }
         }
 
+        /* Estilos para PDF */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            
+            .cube-container,
+            .controls-container,
+            #contact-btn,
+            .skill-search,
+            .modal-backdrop,
+            .modal-content {
+                display: none !important;
+            }
+            
+            header {
+                background: white !important;
+                box-shadow: none !important;
+                border-bottom: 2px solid #0891b2 !important;
+            }
+            
+            .chart-container {
+                height: 300px !important;
+                page-break-inside: avoid;
+            }
+            
+            section {
+                page-break-inside: avoid;
+                margin-bottom: 20px !important;
+            }
+            
+            .timeline-item {
+                page-break-inside: avoid;
+            }
+            
+            .skills-grid {
+                page-break-inside: avoid;
+            }
+        }
+
+
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* Cubo 3D Animado - Similar ao logo do Cursor */
         .cube-container {
             perspective: 200px;
@@ -346,6 +395,21 @@
                     <a href="#educacao" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_education">Educação</a>
                 </div>
                 <div class="controls-container">
+                    <!-- PDF Download Buttons -->
+                    <div class="selector-group">
+                        <button id="pdf-ats" class="selector-btn" data-translate-title="pdf_ats_title">
+                            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            ATS
+                        </button>
+                        <button id="pdf-visual" class="selector-btn" data-translate-title="pdf_visual_title">
+                            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            Visual
+                        </button>
+                    </div>
                     <!-- Theme Selector -->
                     <div class="selector-group">
                         <button id="theme-light" class="selector-btn" data-theme="light" title="Modo Claro">
@@ -495,15 +559,52 @@ document.addEventListener('DOMContentLoaded', () => {
     let skillsChart; 
     let selectedExperienceId = null;
 
-    // Load saved preferences from localStorage
+    // Helper function to get URL parameters
+    const getURLParams = () => {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            lang: params.get('lang'),
+            theme: params.get('theme')
+        };
+    };
+
+    // Helper function to update URL without page reload
+    const updateURL = (lang, theme) => {
+        const url = new URL(window.location);
+        
+        // Update or remove lang parameter
+        if (lang && lang !== 'pt') { // Only add param if not default (pt)
+            url.searchParams.set('lang', lang);
+        } else {
+            url.searchParams.delete('lang');
+        }
+        
+        // Update or remove theme parameter  
+        if (theme && theme !== 'light') { // Only add param if not default (light)
+            url.searchParams.set('theme', theme);
+        } else {
+            url.searchParams.delete('theme');
+        }
+        
+        // Update URL without reloading page
+        window.history.replaceState({}, '', url);
+    };
+
+    // Load preferences from URL first, then localStorage as fallback
+    const urlParams = getURLParams();
     const savedLang = localStorage.getItem('preferred-language');
     const savedTheme = localStorage.getItem('preferred-theme');
     
-    if (savedLang && ['pt', 'en'].includes(savedLang)) {
+    // Priority: URL params > localStorage > defaults
+    if (urlParams.lang && ['pt', 'en'].includes(urlParams.lang)) {
+        currentLang = urlParams.lang;
+    } else if (savedLang && ['pt', 'en'].includes(savedLang)) {
         currentLang = savedLang;
     }
     
-    if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
+    if (urlParams.theme && ['light', 'dark'].includes(urlParams.theme)) {
+        currentTheme = urlParams.theme;
+    } else if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
         currentTheme = savedTheme;
     }
 
@@ -546,7 +647,11 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_text: "© 2024 JESSÉ DE VASCONCELOS JÚNIOR. Todos os direitos reservados.",
             modal_title: "Opções de Contato",
             whatsapp_contact: "WhatsApp: +55 (81) 99206-3389",
-            email_contact: "E-mail: jr.jesse@gmail.com"
+            email_contact: "E-mail: jr.jesse@gmail.com",
+            pdf_generating: "Gerando...",
+            pdf_error: "Erro ao gerar PDF. Tente novamente.",
+            pdf_ats_title: "Baixar PDF ATS",
+            pdf_visual_title: "Baixar PDF Visual"
         },
         en: {
             page_title: "Interactive Resume | Jessé de Vasconcelos Júnior",
@@ -585,7 +690,11 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_text: "© 2024 JESSÉ DE VASCONCELOS JÚNIOR. All rights reserved.",
             modal_title: "Contact Options",
             whatsapp_contact: "WhatsApp: +55 (81) 99206-3389",
-            email_contact: "Email: jr.jesse@gmail.com"
+            email_contact: "Email: jr.jesse@gmail.com",
+            pdf_generating: "Generating...",
+            pdf_error: "Error generating PDF. Please try again.",
+            pdf_ats_title: "Download ATS PDF",
+            pdf_visual_title: "Download Visual PDF"
         }
     };
 
@@ -923,6 +1032,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Save to localStorage
         localStorage.setItem('preferred-theme', theme);
         
+        // Update URL
+        updateURL(currentLang, theme);
+        
         // Re-render chart to update colors
         if (skillsChart) {
             renderSkillsChart();
@@ -944,6 +1056,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        // Translate titles
+        document.querySelectorAll('[data-translate-title]').forEach(el => {
+            const key = el.dataset.translateTitle;
+            if (translations[lang][key]) {
+                el.title = translations[lang][key];
+            }
+        });
         
         // Update active button
         document.querySelectorAll('[data-lang]').forEach(btn => {
@@ -952,6 +1072,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save to localStorage
         localStorage.setItem('preferred-language', lang);
+
+        // Update URL
+        updateURL(lang, currentTheme);
 
         // Re-render dynamic components
         renderSkillsChart();
@@ -1099,7 +1222,291 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModalBtn.addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', closeModal);
 
+    // --- PDF Generation Functions ---
+    const generateATSPDF = async () => {
+        const pdfBtn = document.getElementById('pdf-ats');
+        const originalText = pdfBtn.innerHTML;
+        
+        // Show loading state
+        pdfBtn.classList.add('loading');
+        pdfBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor; animation: spin 1s linear infinite;">
+                <path d="M12,4V2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2V4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/>
+            </svg>
+            ${translations[currentLang].pdf_generating}
+        `;
+        
+        try {
+            // Create ATS-optimized PDF content
+            const atsContent = createATSContent();
+            
+            // Create PDF container with ATS-friendly styling
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.cssText = `
+                background: white;
+                color: black;
+                padding: 20px;
+                font-family: 'Arial, sans-serif';
+                font-size: 12px;
+                line-height: 1.4;
+                max-width: 800px;
+                margin: 0 auto;
+            `;
+            
+            pdfContainer.appendChild(atsContent);
+            
+            // Configure PDF options for ATS compatibility
+            const opt = {
+                margin: [15, 15, 15, 15],
+                filename: `curriculo-jesse-vasconcelos-ats-${currentLang}.pdf`,
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+            
+            // Generate PDF
+            await html2pdf().set(opt).from(pdfContainer).save();
+            
+        } catch (error) {
+            console.error('Erro ao gerar PDF ATS:', error);
+            alert(translations[currentLang].pdf_error);
+        } finally {
+            // Restore button state
+            pdfBtn.classList.remove('loading');
+            pdfBtn.innerHTML = originalText;
+        }
+    };
+
+    const generateVisualPDF = async () => {
+        const pdfBtn = document.getElementById('pdf-visual');
+        const originalText = pdfBtn.innerHTML;
+        
+        // Show loading state
+        pdfBtn.classList.add('loading');
+        pdfBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor; animation: spin 1s linear infinite;">
+                <path d="M12,4V2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2V4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/>
+            </svg>
+            ${translations[currentLang].pdf_generating}
+        `;
+        
+        try {
+            // Create a clone of the main content for visual PDF
+            const mainContent = document.querySelector('main').cloneNode(true);
+            
+            // Remove interactive elements from PDF
+            const elementsToRemove = mainContent.querySelectorAll('.skill-search, .modal-backdrop, .modal-content');
+            elementsToRemove.forEach(el => el.remove());
+            
+            // Create PDF container with visual styling
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.cssText = `
+                background: white;
+                color: black;
+                padding: 20px;
+                font-family: 'Inter', sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+            `;
+            
+            // Add header for visual PDF
+            const pdfHeader = document.createElement('div');
+            pdfHeader.style.cssText = `
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #0891b2;
+                padding-bottom: 20px;
+            `;
+            pdfHeader.innerHTML = `
+                <h1 style="font-size: 28px; font-weight: bold; color: #0891b2; margin: 0 0 10px 0;">
+                    JESSÉ DE VASCONCELOS JÚNIOR
+                </h1>
+                <p style="font-size: 18px; color: #666; margin: 0;">
+                    ${translations[currentLang].main_headline}
+                </p>
+            `;
+            
+            pdfContainer.appendChild(pdfHeader);
+            pdfContainer.appendChild(mainContent);
+            
+            // Configure PDF options for visual quality
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `curriculo-jesse-vasconcelos-visual-${currentLang}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+            
+            // Generate PDF
+            await html2pdf().set(opt).from(pdfContainer).save();
+            
+        } catch (error) {
+            console.error('Erro ao gerar PDF Visual:', error);
+            alert(translations[currentLang].pdf_error);
+        } finally {
+            // Restore button state
+            pdfBtn.classList.remove('loading');
+            pdfBtn.innerHTML = originalText;
+        }
+    };
+
+    // Create ATS-optimized content
+    const createATSContent = () => {
+        const container = document.createElement('div');
+        
+        // Header Section
+        const header = document.createElement('div');
+        header.innerHTML = `
+            <h1 style="font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 10px; color: #000;">
+                JESSÉ DE VASCONCELOS JÚNIOR
+            </h1>
+            <p style="font-size: 16px; text-align: center; margin-bottom: 20px; color: #333;">
+                ${translations[currentLang].main_headline}
+            </p>
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid #000; padding-bottom: 10px;">
+                <p style="margin: 5px 0;">Email: jr.jesse@gmail.com</p>
+                <p style="margin: 5px 0;">WhatsApp: +55 (81) 99206-3389</p>
+                <p style="margin: 5px 0;">LinkedIn: linkedin.com/in/jesse-vasconcelos-37127816</p>
+            </div>
+        `;
+        container.appendChild(header);
+
+        // Professional Summary
+        const summary = document.createElement('div');
+        summary.innerHTML = `
+            <h2 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 5px;">
+                ${currentLang === 'pt' ? 'RESUMO PROFISSIONAL' : 'PROFESSIONAL SUMMARY'}
+            </h2>
+            <p style="margin-bottom: 20px; text-align: justify;">
+                ${translations[currentLang].about_paragraph}
+            </p>
+        `;
+        container.appendChild(summary);
+
+        // Core Skills Section
+        const coreSkills = document.createElement('div');
+        coreSkills.innerHTML = `
+            <h2 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 5px;">
+                ${translations[currentLang].core_skills_title}
+            </h2>
+            <div style="margin-bottom: 20px;">
+                <p><strong>${currentLang === 'pt' ? 'Banco de Dados' : 'Database'}:</strong> 20 anos de experiência</p>
+                <p><strong>${currentLang === 'pt' ? 'Back-end' : 'Back-end'}:</strong> 18 anos de experiência</p>
+                <p><strong>${currentLang === 'pt' ? 'Metodologias & Ferramentas' : 'Methodologies & Tools'}:</strong> 15 anos de experiência</p>
+                <p><strong>${currentLang === 'pt' ? 'Front-end' : 'Front-end'}:</strong> 10 anos de experiência</p>
+                <p><strong>${currentLang === 'pt' ? 'Cloud & DevOps' : 'Cloud & DevOps'}:</strong> 8 anos de experiência</p>
+                <p><strong>${currentLang === 'pt' ? 'Analytics' : 'Analytics'}:</strong> 6 anos de experiência</p>
+            </div>
+        `;
+        container.appendChild(coreSkills);
+
+        // Technical Skills
+        const techSkills = document.createElement('div');
+        let skillsText = '';
+        Object.entries(allSkills).forEach(([category, skills]) => {
+            skillsText += `<p><strong>${category}:</strong> ${skills.join(', ')}</p>`;
+        });
+        
+        techSkills.innerHTML = `
+            <h2 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 5px;">
+                ${currentLang === 'pt' ? 'COMPETÊNCIAS TÉCNICAS' : 'TECHNICAL SKILLS'}
+            </h2>
+            <div style="margin-bottom: 20px;">
+                ${skillsText}
+            </div>
+        `;
+        container.appendChild(techSkills);
+
+        // Professional Experience
+        const experience = document.createElement('div');
+        experience.innerHTML = `
+            <h2 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 5px;">
+                ${currentLang === 'pt' ? 'EXPERIÊNCIA PROFISSIONAL' : 'PROFESSIONAL EXPERIENCE'}
+            </h2>
+        `;
+        
+        experienceData.forEach(item => {
+            const expDiv = document.createElement('div');
+            expDiv.style.marginBottom = '15px';
+            expDiv.innerHTML = `
+                <h3 style="font-size: 16px; font-weight: bold; margin: 10px 0 5px 0; color: #000;">
+                    ${item.role[currentLang]} - ${item.company}
+                </h3>
+                <p style="font-style: italic; margin: 5px 0; color: #666;">
+                    ${item.period}
+                </p>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    ${item.description[currentLang].map(desc => `<li style="margin: 5px 0;">${desc}</li>`).join('')}
+                </ul>
+                <p style="margin: 5px 0;"><strong>${currentLang === 'pt' ? 'Tecnologias' : 'Technologies'}:</strong> ${item.tech.join(', ')}</p>
+            `;
+            experience.appendChild(expDiv);
+        });
+        container.appendChild(experience);
+
+        // Education
+        const education = document.createElement('div');
+        education.innerHTML = `
+            <h2 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 5px;">
+                ${currentLang === 'pt' ? 'FORMAÇÃO ACADÊMICA' : 'EDUCATION'}
+            </h2>
+            <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; font-weight: bold; margin: 10px 0 5px 0; color: #000;">
+                    ${translations[currentLang].postgrad_title}
+                </h3>
+                <p style="margin: 5px 0;">Cesar School</p>
+                <p style="margin: 5px 0; font-style: italic;">${translations[currentLang].postgrad_date}</p>
+                
+                <h3 style="font-size: 16px; font-weight: bold; margin: 15px 0 5px 0; color: #000;">
+                    ${translations[currentLang].grad_title}
+                </h3>
+                <p style="margin: 5px 0;">UNICAP</p>
+                <p style="margin: 5px 0; font-style: italic;">${translations[currentLang].grad_date}</p>
+            </div>
+        `;
+        container.appendChild(education);
+
+        // Languages
+        const languages = document.createElement('div');
+        languages.innerHTML = `
+            <h2 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 5px;">
+                ${translations[currentLang].languages_title}
+            </h2>
+            <div style="margin-bottom: 20px;">
+                <p><strong>${translations[currentLang].english_level}</strong></p>
+                <p>${currentLang === 'pt' ? 'Leitura' : 'Reading'}: ${currentLang === 'pt' ? 'Avançado' : 'Advanced'}</p>
+                <p>${currentLang === 'pt' ? 'Escrita' : 'Writing'}: ${currentLang === 'pt' ? 'Intermediário' : 'Intermediate'}</p>
+                <p>${currentLang === 'pt' ? 'Escuta' : 'Listening'}: ${currentLang === 'pt' ? 'Avançado' : 'Advanced'}</p>
+            </div>
+        `;
+        container.appendChild(languages);
+
+        return container;
+    };
+
     // --- Event Listeners ---
+    document.getElementById('pdf-ats').addEventListener('click', generateATSPDF);
+    document.getElementById('pdf-visual').addEventListener('click', generateVisualPDF);
     document.getElementById('theme-light').addEventListener('click', () => setTheme('light'));
     document.getElementById('theme-dark').addEventListener('click', () => setTheme('dark'));
     document.getElementById('lang-pt').addEventListener('click', () => setLanguage('pt'));
