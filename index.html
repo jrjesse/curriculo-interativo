@@ -651,7 +651,12 @@ document.addEventListener('DOMContentLoaded', () => {
             pdf_generating: "Gerando...",
             pdf_error: "Erro ao gerar PDF. Tente novamente.",
             pdf_ats_title: "Baixar PDF ATS",
-            pdf_visual_title: "Baixar PDF Visual"
+            pdf_visual_title: "Baixar PDF Visual",
+            professional_summary: "RESUMO PROFISSIONAL",
+            technical_skills: "COMPETÊNCIAS TÉCNICAS",
+            professional_experience: "EXPERIÊNCIA PROFISSIONAL",
+            academic_formation: "FORMAÇÃO ACADÊMICA",
+            years_experience: "anos de experiência"
         },
         en: {
             page_title: "Interactive Resume | Jessé de Vasconcelos Júnior",
@@ -694,7 +699,12 @@ document.addEventListener('DOMContentLoaded', () => {
             pdf_generating: "Generating...",
             pdf_error: "Error generating PDF. Please try again.",
             pdf_ats_title: "Download ATS PDF",
-            pdf_visual_title: "Download Visual PDF"
+            pdf_visual_title: "Download Visual PDF",
+            professional_summary: "PROFESSIONAL SUMMARY",
+            technical_skills: "TECHNICAL SKILLS",
+            professional_experience: "PROFESSIONAL EXPERIENCE",
+            academic_formation: "EDUCATION",
+            years_experience: "years of experience"
         }
     };
 
@@ -1399,7 +1409,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const summary = document.createElement('div');
         summary.innerHTML = `
             <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${currentLang === 'pt' ? 'RESUMO PROFISSIONAL' : 'PROFESSIONAL SUMMARY'}
+                ${translations[currentLang].professional_summary}
             </h2>
             <p style="margin-bottom: 15px; text-align: justify;">
                 ${translations[currentLang].about_paragraph}
@@ -1414,12 +1424,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${translations[currentLang].core_skills_title}
             </h2>
             <div style="margin-bottom: 15px;">
-                <p><strong>${translations[currentLang].chart_categories[0]}:</strong> 20 ${currentLang === 'pt' ? 'anos de experiência' : 'years of experience'}</p>
-                <p><strong>${translations[currentLang].chart_categories[1]}:</strong> 18 ${currentLang === 'pt' ? 'anos de experiência' : 'years of experience'}</p>
-                <p><strong>${translations[currentLang].chart_categories[2]}:</strong> 15 ${currentLang === 'pt' ? 'anos de experiência' : 'years of experience'}</p>
-                <p><strong>${translations[currentLang].chart_categories[3]}:</strong> 10 ${currentLang === 'pt' ? 'anos de experiência' : 'years of experience'}</p>
-                <p><strong>${translations[currentLang].chart_categories[4]}:</strong> 8 ${currentLang === 'pt' ? 'anos de experiência' : 'years of experience'}</p>
-                <p><strong>${translations[currentLang].chart_categories[5]}:</strong> 6 ${currentLang === 'pt' ? 'anos de experiência' : 'years of experience'}</p>
+                <p><strong>${translations[currentLang].chart_categories[0]}:</strong> 20 ${translations[currentLang].years_experience}</p>
+                <p><strong>${translations[currentLang].chart_categories[1]}:</strong> 18 ${translations[currentLang].years_experience}</p>
+                <p><strong>${translations[currentLang].chart_categories[2]}:</strong> 15 ${translations[currentLang].years_experience}</p>
+                <p><strong>${translations[currentLang].chart_categories[3]}:</strong> 10 ${translations[currentLang].years_experience}</p>
+                <p><strong>${translations[currentLang].chart_categories[4]}:</strong> 8 ${translations[currentLang].years_experience}</p>
+                <p><strong>${translations[currentLang].chart_categories[5]}:</strong> 6 ${translations[currentLang].years_experience}</p>
             </div>
         `;
         container.appendChild(coreSkills);
@@ -1427,13 +1437,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Technical Skills
         const techSkills = document.createElement('div');
         let skillsText = '';
+        
+        // Mapeamento de categorias para português
+        const categoryMapping = {
+            'Back-end': currentLang === 'pt' ? 'Back-end' : 'Back-end',
+            'Front-end': currentLang === 'pt' ? 'Front-end' : 'Front-end',
+            'Banco de Dados': currentLang === 'pt' ? 'Banco de Dados' : 'Database',
+            'Analytics': currentLang === 'pt' ? 'Analytics' : 'Analytics',
+            'Cloud & DevOps': currentLang === 'pt' ? 'Cloud & DevOps' : 'Cloud & DevOps',
+            'Metodologias & Ferramentas': currentLang === 'pt' ? 'Metodologias & Ferramentas' : 'Methodologies & Tools'
+        };
+        
         Object.entries(allSkills).forEach(([category, skills]) => {
-            skillsText += `<p><strong>${category}:</strong> ${skills.join(', ')}</p>`;
+            const translatedCategory = categoryMapping[category] || category;
+            skillsText += `<p><strong>${translatedCategory}:</strong> ${skills.join(', ')}</p>`;
         });
         
         techSkills.innerHTML = `
             <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${currentLang === 'pt' ? 'COMPETÊNCIAS TÉCNICAS' : 'TECHNICAL SKILLS'}
+                ${translations[currentLang].technical_skills}
             </h2>
             <div style="margin-bottom: 15px;">
                 ${skillsText}
@@ -1445,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const experience = document.createElement('div');
         experience.innerHTML = `
             <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${currentLang === 'pt' ? 'EXPERIÊNCIA PROFISSIONAL' : 'PROFESSIONAL EXPERIENCE'}
+                ${translations[currentLang].professional_experience}
             </h2>
         `;
         
@@ -1462,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <ul style="margin: 8px 0; padding-left: 20px;">
                         ${item.description[currentLang].map(desc => `<li style="margin: 3px 0;">${desc}</li>`).join('')}
                     </ul>
-                    <p style="margin: 3px 0;"><strong>${currentLang === 'pt' ? 'Tecnologias' : 'Technologies'}:</strong> ${item.tech.join(', ')}</p>
+                    <p style="margin: 3px 0;"><strong>${translations[currentLang].tech_label}</strong> ${item.tech.join(', ')}</p>
                 `;
             experience.appendChild(expDiv);
         });
@@ -1472,7 +1494,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const education = document.createElement('div');
         education.innerHTML = `
             <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${currentLang === 'pt' ? 'FORMAÇÃO ACADÊMICA' : 'EDUCATION'}
+                ${translations[currentLang].academic_formation}
             </h2>
             <div style="margin-bottom: 15px;">
                 <h3 style="font-size: 14px; font-weight: bold; margin: 8px 0 4px 0; color: #000;">
@@ -1498,9 +1520,9 @@ document.addEventListener('DOMContentLoaded', () => {
             </h2>
             <div style="margin-bottom: 15px;">
                 <p><strong>${translations[currentLang].english_level}</strong></p>
-                <p>${currentLang === 'pt' ? 'Leitura' : 'Reading'}: ${currentLang === 'pt' ? 'Avançado' : 'Advanced'}</p>
-                <p>${currentLang === 'pt' ? 'Escrita' : 'Writing'}: ${currentLang === 'pt' ? 'Intermediário' : 'Intermediate'}</p>
-                <p>${currentLang === 'pt' ? 'Escuta' : 'Listening'}: ${currentLang === 'pt' ? 'Avançado' : 'Advanced'}</p>
+                <p>${translations[currentLang].reading_skill}: ${translations[currentLang].advanced_level}</p>
+                <p>${translations[currentLang].writing_skill}: ${translations[currentLang].intermediate_level}</p>
+                <p>${translations[currentLang].listening_skill}: ${translations[currentLang].advanced_level_2}</p>
             </div>
         `;
         container.appendChild(languages);
