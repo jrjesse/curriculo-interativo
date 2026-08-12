@@ -1272,19 +1272,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     };
 
-    const mountPdfNode = (node) => {
-        node.style.position = 'fixed';
-        node.style.left = '0';
-        node.style.top = '0';
-        node.style.zIndex = '-1';
-        node.style.opacity = '0.01';
-        node.style.pointerEvents = 'none';
-        document.body.appendChild(node);
-    };
+    const downloadPdfMake = (docDefinition, filename) =>
+        new Promise((resolve, reject) => {
+            try {
+                pdfMake.createPdf(docDefinition).download(filename, resolve);
+            } catch (err) {
+                reject(err);
+            }
+        });
 
-    const waitForLayout = async () => {
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        window.scrollTo(0, 0);
+    const visualSectionTitle = (title) => ({
+        text: title.toUpperCase(),
+        style: 'vSection',
+        margin: [0, 12, 0, 6]
+    });
+
+    const skillBar = (label, years, yearsLabel) => {
+        const filled = Math.max(1, Math.min(10, Math.round((years / 20) * 10)));
+        const empty = 10 - filled;
+        return {
+            margin: [0, 0, 0, 6],
+            stack: [
+                {
+                    columns: [
+                        { text: label, style: 'vSkillLabel', width: '*' },
+                        { text: `${years} ${yearsLabel}`, style: 'vMuted', width: 'auto', alignment: 'right' }
+                    ]
+                },
+                {
+                    table: {
+                        widths: [...Array(filled).fill('*'), ...Array(empty).fill('*')],
+                        heights: [6],
+                        body: [[
+                            ...Array(filled).fill({ text: '', fillColor: '#0891b2', border: [false, false, false, false] }),
+                            ...Array(empty).fill({ text: '', fillColor: '#e2e8f0', border: [false, false, false, false] })
+                        ]]
+                    },
+                    layout: {
+                        paddingLeft: () => 0,
+                        paddingRight: () => 0,
+                        paddingTop: () => 0,
+                        paddingBottom: () => 0,
+                        hLineWidth: () => 0,
+                        vLineWidth: () => 0
+                    },
+                    margin: [0, 3, 0, 0]
+                }
+            ]
+        };
     };
 
     // --- PDF Generation Functions ---
@@ -1426,16 +1461,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             };
 
-            await new Promise((resolve, reject) => {
-                try {
-                    pdfMake.createPdf(docDefinition).download(
-                        `curriculo-jesse-vasconcelos-ats-${currentLang}.pdf`,
-                        resolve
-                    );
-                } catch (err) {
-                    reject(err);
-                }
-            });
+            await downloadPdfMake(docDefinition, `curriculo-jesse-vasconcelos-ats-${currentLang}.pdf`);
         } catch (error) {
             console.error('Erro ao gerar PDF ATS:', error);
             alert(translations[currentLang].pdf_error);
@@ -1445,134 +1471,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const createVisualContent = () => {
-        const t = translations[currentLang];
-        const container = document.createElement('div');
-        container.style.cssText = `
-            width: 794px;
-            box-sizing: border-box;
-            padding: 28px 32px;
-            margin: 0;
-            background: #ffffff;
-            color: #0f172a;
-            font-family: Inter, Helvetica, Arial, sans-serif;
-        `;
-
-        const coreSkillsHtml = coreSkillRows().map((row) => {
-            const pct = Math.round((row.years / 20) * 100);
-            return `
-                <div style="margin: 0 0 10px 0;">
-                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
-                        <span style="font-weight: 600;">${row.label}</span>
-                        <span style="color: #64748b;">${row.years} ${t.years_experience}</span>
-                    </div>
-                    <div style="height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden;">
-                        <div style="height: 100%; width: ${pct}%; background: #0891b2; border-radius: 999px;"></div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        const skillsHtml = Object.entries(allSkills).map(([category, skills]) => `
-            <div style="margin: 0 0 8px 0;">
-                <div style="font-size: 12px; font-weight: 700; color: #0e7490; margin-bottom: 2px;">${skillCategoryLabel(category)}</div>
-                <div style="font-size: 11.5px; color: #334155; line-height: 1.45;">${skills.map(localizeSkillName).join(' · ')}</div>
-            </div>
-        `).join('');
-
-        const experienceHtml = experienceData.map((item) => `
-            <article class="visual-job" style="margin: 0 0 14px 0; padding: 0 0 12px 0; border-bottom: 1px solid #e2e8f0; page-break-inside: avoid; break-inside: avoid;">
-                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline;">
-                    <h3 style="margin: 0; font-size: 13.5px; font-weight: 700; color: #0f172a;">
-                        ${item.role[currentLang]}
-                        <span style="font-weight: 500; color: #0891b2;"> · ${item.company}</span>
-                    </h3>
-                    <span style="font-size: 11px; color: #64748b; white-space: nowrap;">${localizePeriod(item.period)}</span>
-                </div>
-                <ul style="margin: 8px 0 6px 0; padding-left: 18px; color: #334155; font-size: 11.5px; line-height: 1.45;">
-                    ${item.description[currentLang].map((desc) => `<li style="margin: 0 0 4px 0;">${desc}</li>`).join('')}
-                </ul>
-                <p style="margin: 0; font-size: 11px; color: #475569;">
-                    <strong style="color: #0f172a;">${t.tech_label}</strong> ${item.tech.map(localizeSkillName).join(', ')}
-                </p>
-            </article>
-        `).join('');
-
-        container.innerHTML = `
-            <header style="margin: 0 0 22px 0; padding-bottom: 16px; border-bottom: 3px solid #0891b2;">
-                <h1 style="margin: 0 0 6px 0; font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; color: #0f172a;">
-                    Jessé de Vasconcelos Júnior
-                </h1>
-                <p style="margin: 0 0 10px 0; font-size: 15px; color: #0891b2; font-weight: 600;">
-                    ${t.main_headline}
-                </p>
-                <p style="margin: 0; font-size: 11.5px; color: #64748b; line-height: 1.5;">
-                    jr.jesse@gmail.com · +55 (81) 99206-3389 · linkedin.com/in/jesse-vasconcelos-37127816
-                </p>
-            </header>
-
-            <section class="visual-keep" style="margin: 0 0 18px 0; page-break-inside: avoid; break-inside: avoid;">
-                <h2 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
-                    ${t.professional_summary}
-                </h2>
-                <p style="margin: 0; font-size: 12px; line-height: 1.55; color: #334155; text-align: justify;">
-                    ${t.about_paragraph}
-                </p>
-            </section>
-
-            <section class="visual-keep" style="margin: 0 0 18px 0; page-break-inside: avoid; break-inside: avoid;">
-                <h2 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
-                    ${t.core_skills_title}
-                </h2>
-                ${coreSkillsHtml}
-            </section>
-
-            <section class="visual-keep" style="margin: 0 0 18px 0; page-break-inside: avoid; break-inside: avoid;">
-                <h2 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
-                    ${t.technical_skills}
-                </h2>
-                ${skillsHtml}
-            </section>
-
-            <section style="margin: 0 0 18px 0;">
-                <h2 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
-                    ${t.professional_experience}
-                </h2>
-                ${experienceHtml}
-            </section>
-
-            <section class="visual-keep" style="margin: 0 0 18px 0; page-break-inside: avoid; break-inside: avoid;">
-                <h2 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
-                    ${t.academic_formation}
-                </h2>
-                <div style="margin: 0 0 10px 0;">
-                    <div style="font-size: 12.5px; font-weight: 700;">${t.postgrad_title}</div>
-                    <div style="font-size: 11.5px; color: #475569;">Cesar School · ${t.postgrad_date}</div>
-                </div>
-                <div>
-                    <div style="font-size: 12.5px; font-weight: 700;">${t.grad_title}</div>
-                    <div style="font-size: 11.5px; color: #475569;">UNICAP · ${t.grad_date}</div>
-                </div>
-            </section>
-
-            <section class="visual-keep" style="page-break-inside: avoid; break-inside: avoid;">
-                <h2 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
-                    ${t.languages_title}
-                </h2>
-                <p style="margin: 0; font-size: 12px; color: #334155; line-height: 1.5;">
-                    <strong>${t.english_level}</strong><br>
-                    ${t.reading_skill}: ${t.advanced_level} · ${t.writing_skill}: ${t.intermediate_level} · ${t.listening_skill}: ${t.advanced_level_2}
-                </p>
-            </section>
-        `;
-
-        return container;
-    };
-
     const generateVisualPDF = async () => {
         const pdfBtn = document.getElementById('pdf-visual');
         const originalText = pdfBtn.innerHTML;
-        let pdfContainer = null;
 
         pdfBtn.classList.add('loading');
         pdfBtn.innerHTML = `
@@ -1583,44 +1484,133 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         try {
-            const visualContent = createVisualContent();
-            pdfContainer = document.createElement('div');
-            pdfContainer.id = 'visual-pdf-export';
-            pdfContainer.style.width = '794px';
-            pdfContainer.style.background = '#ffffff';
-            pdfContainer.appendChild(visualContent);
-            mountPdfNode(pdfContainer);
-            await waitForLayout();
+            // Human visual layout via pdfmake (avoids blank html2canvas captures)
+            const t = translations[currentLang];
 
-            const opt = {
-                margin: [8, 8, 8, 8],
-                filename: `curriculo-jesse-vasconcelos-visual-${currentLang}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: 794
+            const coreBars = coreSkillRows().map((row) =>
+                skillBar(row.label, row.years, t.years_experience)
+            );
+
+            const skillsBlocks = Object.entries(allSkills).map(([category, skills]) => ({
+                margin: [0, 0, 0, 6],
+                stack: [
+                    { text: skillCategoryLabel(category), style: 'vCat', margin: [0, 0, 0, 1] },
+                    { text: skills.map(localizeSkillName).join(' · '), style: 'vBody' }
+                ]
+            }));
+
+            const experienceBlocks = experienceData.map((item) => ({
+                margin: [0, 0, 0, 10],
+                stack: [
+                    {
+                        columns: [
+                            {
+                                text: [
+                                    { text: item.role[currentLang], style: 'vJobTitle' },
+                                    { text: `  ·  ${item.company}`, style: 'vCompany' }
+                                ],
+                                width: '*'
+                            },
+                            {
+                                text: localizePeriod(item.period),
+                                style: 'vMuted',
+                                width: 'auto',
+                                alignment: 'right'
+                            }
+                        ]
+                    },
+                    {
+                        ul: item.description[currentLang],
+                        style: 'vBody',
+                        margin: [0, 4, 0, 3]
+                    },
+                    {
+                        text: [
+                            { text: `${t.tech_label} `, bold: true, color: '#0f172a' },
+                            { text: item.tech.map(localizeSkillName).join(', '), color: '#475569' }
+                        ],
+                        fontSize: 9
+                    },
+                    {
+                        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#e2e8f0' }],
+                        margin: [0, 8, 0, 0]
+                    }
+                ]
+            }));
+
+            const docDefinition = {
+                pageSize: 'A4',
+                pageMargins: [36, 32, 36, 32],
+                defaultStyle: {
+                    font: 'Roboto',
+                    fontSize: 10,
+                    lineHeight: 1.3,
+                    color: '#0f172a'
                 },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
+                styles: {
+                    vName: { fontSize: 22, bold: true, color: '#0f172a' },
+                    vHeadline: { fontSize: 13, bold: true, color: '#0891b2' },
+                    vContact: { fontSize: 9.5, color: '#64748b' },
+                    vSection: { fontSize: 11, bold: true, color: '#0e7490', characterSpacing: 0.6 },
+                    vSkillLabel: { fontSize: 10, bold: true },
+                    vCat: { fontSize: 10, bold: true, color: '#0e7490' },
+                    vJobTitle: { fontSize: 11, bold: true, color: '#0f172a' },
+                    vCompany: { fontSize: 11, color: '#0891b2' },
+                    vMuted: { fontSize: 9, color: '#64748b' },
+                    vBody: { fontSize: 10, color: '#334155' }
                 },
-                pagebreak: { mode: ['css', 'legacy'], avoid: ['.visual-job', '.visual-keep'] }
+                content: [
+                    { text: 'Jessé de Vasconcelos Júnior', style: 'vName', margin: [0, 0, 0, 4] },
+                    { text: t.main_headline, style: 'vHeadline', margin: [0, 0, 0, 6] },
+                    {
+                        text: 'jr.jesse@gmail.com  ·  +55 (81) 99206-3389  ·  linkedin.com/in/jesse-vasconcelos-37127816',
+                        style: 'vContact',
+                        margin: [0, 0, 0, 8]
+                    },
+                    {
+                        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 2.5, lineColor: '#0891b2' }],
+                        margin: [0, 0, 0, 8]
+                    },
+
+                    visualSectionTitle(t.professional_summary),
+                    { text: t.about_paragraph, style: 'vBody', alignment: 'justify', margin: [0, 0, 0, 4] },
+
+                    visualSectionTitle(t.core_skills_title),
+                    ...coreBars,
+
+                    visualSectionTitle(t.technical_skills),
+                    ...skillsBlocks,
+
+                    visualSectionTitle(t.professional_experience),
+                    ...experienceBlocks,
+
+                    visualSectionTitle(t.academic_formation),
+                    {
+                        margin: [0, 0, 0, 8],
+                        stack: [
+                            { text: t.postgrad_title, bold: true, fontSize: 10.5 },
+                            { text: `Cesar School · ${t.postgrad_date}`, style: 'vMuted', margin: [0, 1, 0, 6] },
+                            { text: t.grad_title, bold: true, fontSize: 10.5 },
+                            { text: `UNICAP · ${t.grad_date}`, style: 'vMuted', margin: [0, 1, 0, 0] }
+                        ]
+                    },
+
+                    visualSectionTitle(t.languages_title),
+                    {
+                        text: [
+                            { text: `${t.english_level}\n`, bold: true },
+                            `${t.reading_skill}: ${t.advanced_level}  ·  ${t.writing_skill}: ${t.intermediate_level}  ·  ${t.listening_skill}: ${t.advanced_level_2}`
+                        ],
+                        style: 'vBody'
+                    }
+                ]
             };
 
-            await html2pdf().set(opt).from(pdfContainer).save();
+            await downloadPdfMake(docDefinition, `curriculo-jesse-vasconcelos-visual-${currentLang}.pdf`);
         } catch (error) {
             console.error('Erro ao gerar PDF Visual:', error);
             alert(translations[currentLang].pdf_error);
         } finally {
-            if (pdfContainer && pdfContainer.parentNode) {
-                pdfContainer.parentNode.removeChild(pdfContainer);
-            }
             pdfBtn.classList.remove('loading');
             pdfBtn.innerHTML = originalText;
         }
