@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1232,13 +1234,64 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModalBtn.addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', closeModal);
 
+    // --- PDF helpers ---
+    const localizePeriod = (period) => {
+        if (currentLang !== 'en') return period;
+        return String(period)
+            .replace(/\s*[–—]\s*/g, ' - ')
+            .replace(/no momento/gi, 'Present')
+            .replace(/até o momento/gi, 'Present');
+    };
+
+    const localizeSkillName = (skill) => {
+        if (currentLang !== 'en') return skill;
+        const map = {
+            'Arquitetura Hexagonal': 'Hexagonal Architecture',
+            'Metodologias Ágeis': 'Agile Methodologies'
+        };
+        return map[skill] || skill;
+    };
+
+    const skillCategoryLabel = (category) => {
+        const map = {
+            'Back-end': 'Back-end',
+            'Front-end': 'Front-end',
+            'Banco de Dados': currentLang === 'pt' ? 'Banco de Dados' : 'Database',
+            'Analytics': 'Analytics',
+            'Cloud & DevOps': 'Cloud & DevOps',
+            'Metodologias & Ferramentas': currentLang === 'pt' ? 'Metodologias & Ferramentas' : 'Methodologies & Tools'
+        };
+        return map[category] || category;
+    };
+
+    const coreSkillRows = () => {
+        const years = [20, 18, 15, 10, 8, 6];
+        return translations[currentLang].chart_categories.map((label, i) => ({
+            label,
+            years: years[i]
+        }));
+    };
+
+    const mountPdfNode = (node) => {
+        node.style.position = 'fixed';
+        node.style.left = '0';
+        node.style.top = '0';
+        node.style.zIndex = '-1';
+        node.style.opacity = '0.01';
+        node.style.pointerEvents = 'none';
+        document.body.appendChild(node);
+    };
+
+    const waitForLayout = async () => {
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        window.scrollTo(0, 0);
+    };
+
     // --- PDF Generation Functions ---
     const generateATSPDF = async () => {
         const pdfBtn = document.getElementById('pdf-ats');
         const originalText = pdfBtn.innerHTML;
-        let pdfContainer = null;
-        
-        // Show loading state
+
         pdfBtn.classList.add('loading');
         pdfBtn.innerHTML = `
             <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor; animation: spin 1s linear infinite;">
@@ -1246,82 +1299,281 @@ document.addEventListener('DOMContentLoaded', () => {
             </svg>
             ${translations[currentLang].pdf_generating}
         `;
-        
+
         try {
-            // Create ATS-optimized PDF content
-            const atsContent = createATSContent();
-            
-            // Mount off-screen so html2canvas can measure height correctly
-            // (detached nodes often produce blank first pages, worse with longer PT text)
-            pdfContainer = document.createElement('div');
-            pdfContainer.id = 'ats-pdf-export';
-            pdfContainer.style.cssText = `
-                position: absolute;
-                left: -9999px;
-                top: 0;
-                background: #ffffff;
-                color: #000000;
-                padding: 0;
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 11px;
-                line-height: 1.35;
-                width: 794px;
-                margin: 0;
-                box-sizing: border-box;
-                overflow: visible;
-            `;
-            
-            pdfContainer.appendChild(atsContent);
-            document.body.appendChild(pdfContainer);
-            
-            // Let the browser finish layout before capture
-            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-            window.scrollTo(0, 0);
-            
-            const opt = {
-                margin: [8, 10, 8, 10],
-                filename: `curriculo-jesse-vasconcelos-ats-${currentLang}.pdf`,
-                image: { type: 'jpeg', quality: 0.95 },
-                html2canvas: { 
-                    scale: 1.5,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: 794
+            // Text-layer PDF (pdfmake) — selectable and ATS-parseable; not an image raster
+            const t = translations[currentLang];
+            const section = (title) => ({
+                text: title.toUpperCase(),
+                style: 'section',
+                margin: [0, 10, 0, 4]
+            });
+
+            const skillsBlocks = Object.entries(allSkills).map(([category, skills]) => ({
+                text: [
+                    { text: `${skillCategoryLabel(category)}: `, bold: true },
+                    skills.map(localizeSkillName).join(', ')
+                ],
+                margin: [0, 1, 0, 1],
+                style: 'body'
+            }));
+
+            const experienceBlocks = experienceData.flatMap((item) => {
+                const bullets = item.description[currentLang].map((desc) => ({
+                    text: desc,
+                    margin: [0, 1, 0, 1]
+                }));
+                return [
+                    {
+                        text: `${item.role[currentLang]} | ${item.company}`,
+                        style: 'jobTitle',
+                        margin: [0, 8, 0, 1]
+                    },
+                    {
+                        text: localizePeriod(item.period),
+                        style: 'muted',
+                        margin: [0, 0, 0, 2]
+                    },
+                    {
+                        ul: bullets,
+                        style: 'body',
+                        margin: [0, 0, 0, 2]
+                    },
+                    {
+                        text: [
+                            { text: `${t.tech_label} `, bold: true },
+                            item.tech.map(localizeSkillName).join(', ')
+                        ],
+                        style: 'body',
+                        margin: [0, 0, 0, 2]
+                    }
+                ];
+            });
+
+            const coreLines = coreSkillRows().map((row) => ({
+                text: [
+                    { text: `${row.label}: `, bold: true },
+                    `${row.years} ${t.years_experience}`
+                ],
+                margin: [0, 1, 0, 1],
+                style: 'body'
+            }));
+
+            const docDefinition = {
+                pageSize: 'A4',
+                pageMargins: [40, 36, 40, 36],
+                defaultStyle: {
+                    font: 'Roboto',
+                    fontSize: 10,
+                    lineHeight: 1.25,
+                    color: '#111111'
                 },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait',
-                    compress: true
+                styles: {
+                    name: { fontSize: 18, bold: true, alignment: 'center' },
+                    headline: { fontSize: 11, alignment: 'center', color: '#333333' },
+                    contact: { fontSize: 9, alignment: 'center', color: '#333333' },
+                    section: { fontSize: 11, bold: true },
+                    jobTitle: { fontSize: 10.5, bold: true },
+                    muted: { fontSize: 9, italics: true, color: '#444444' },
+                    body: { fontSize: 10 }
                 },
-                // avoid-all causes blank pages when a block is taller than one page
-                pagebreak: { mode: ['css', 'legacy'], avoid: ['.ats-job', '.ats-keep'] }
+                content: [
+                    { text: 'JESSÉ DE VASCONCELOS JÚNIOR', style: 'name', margin: [0, 0, 0, 4] },
+                    { text: t.main_headline, style: 'headline', margin: [0, 0, 0, 6] },
+                    {
+                        text: 'jr.jesse@gmail.com | +55 (81) 99206-3389 | linkedin.com/in/jesse-vasconcelos-37127816',
+                        style: 'contact',
+                        margin: [0, 0, 0, 8]
+                    },
+                    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#000000' }], margin: [0, 0, 0, 6] },
+
+                    section(t.professional_summary),
+                    { text: t.about_paragraph, style: 'body', alignment: 'justify', margin: [0, 0, 0, 4] },
+
+                    section(t.core_skills_title),
+                    ...coreLines,
+
+                    section(t.technical_skills),
+                    ...skillsBlocks,
+
+                    section(t.professional_experience),
+                    ...experienceBlocks,
+
+                    section(t.academic_formation),
+                    {
+                        text: [
+                            { text: `${t.postgrad_title}\n`, bold: true },
+                            'Cesar School\n',
+                            { text: `${t.postgrad_date}\n\n`, italics: true },
+                            { text: `${t.grad_title}\n`, bold: true },
+                            'UNICAP\n',
+                            { text: t.grad_date, italics: true }
+                        ],
+                        style: 'body',
+                        margin: [0, 0, 0, 4]
+                    },
+
+                    section(t.languages_title),
+                    {
+                        text: [
+                            { text: `${t.english_level}\n`, bold: true },
+                            `${t.reading_skill}: ${t.advanced_level}\n`,
+                            `${t.writing_skill}: ${t.intermediate_level}\n`,
+                            `${t.listening_skill}: ${t.advanced_level_2}`
+                        ],
+                        style: 'body'
+                    }
+                ]
             };
-            
-            await html2pdf().set(opt).from(pdfContainer).save();
-            
+
+            await new Promise((resolve, reject) => {
+                try {
+                    pdfMake.createPdf(docDefinition).download(
+                        `curriculo-jesse-vasconcelos-ats-${currentLang}.pdf`,
+                        resolve
+                    );
+                } catch (err) {
+                    reject(err);
+                }
+            });
         } catch (error) {
             console.error('Erro ao gerar PDF ATS:', error);
             alert(translations[currentLang].pdf_error);
         } finally {
-            if (pdfContainer && pdfContainer.parentNode) {
-                pdfContainer.parentNode.removeChild(pdfContainer);
-            }
             pdfBtn.classList.remove('loading');
             pdfBtn.innerHTML = originalText;
         }
+    };
+
+    const createVisualContent = () => {
+        const t = translations[currentLang];
+        const container = document.createElement('div');
+        container.style.cssText = `
+            width: 794px;
+            box-sizing: border-box;
+            padding: 28px 32px;
+            margin: 0;
+            background: #ffffff;
+            color: #0f172a;
+            font-family: Inter, Helvetica, Arial, sans-serif;
+        `;
+
+        const coreSkillsHtml = coreSkillRows().map((row) => {
+            const pct = Math.round((row.years / 20) * 100);
+            return `
+                <div style="margin: 0 0 10px 0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                        <span style="font-weight: 600;">${row.label}</span>
+                        <span style="color: #64748b;">${row.years} ${t.years_experience}</span>
+                    </div>
+                    <div style="height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden;">
+                        <div style="height: 100%; width: ${pct}%; background: #0891b2; border-radius: 999px;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const skillsHtml = Object.entries(allSkills).map(([category, skills]) => `
+            <div style="margin: 0 0 8px 0;">
+                <div style="font-size: 12px; font-weight: 700; color: #0e7490; margin-bottom: 2px;">${skillCategoryLabel(category)}</div>
+                <div style="font-size: 11.5px; color: #334155; line-height: 1.45;">${skills.map(localizeSkillName).join(' · ')}</div>
+            </div>
+        `).join('');
+
+        const experienceHtml = experienceData.map((item) => `
+            <article class="visual-job" style="margin: 0 0 14px 0; padding: 0 0 12px 0; border-bottom: 1px solid #e2e8f0; page-break-inside: avoid; break-inside: avoid;">
+                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline;">
+                    <h3 style="margin: 0; font-size: 13.5px; font-weight: 700; color: #0f172a;">
+                        ${item.role[currentLang]}
+                        <span style="font-weight: 500; color: #0891b2;"> · ${item.company}</span>
+                    </h3>
+                    <span style="font-size: 11px; color: #64748b; white-space: nowrap;">${localizePeriod(item.period)}</span>
+                </div>
+                <ul style="margin: 8px 0 6px 0; padding-left: 18px; color: #334155; font-size: 11.5px; line-height: 1.45;">
+                    ${item.description[currentLang].map((desc) => `<li style="margin: 0 0 4px 0;">${desc}</li>`).join('')}
+                </ul>
+                <p style="margin: 0; font-size: 11px; color: #475569;">
+                    <strong style="color: #0f172a;">${t.tech_label}</strong> ${item.tech.map(localizeSkillName).join(', ')}
+                </p>
+            </article>
+        `).join('');
+
+        container.innerHTML = `
+            <header style="margin: 0 0 22px 0; padding-bottom: 16px; border-bottom: 3px solid #0891b2;">
+                <h1 style="margin: 0 0 6px 0; font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; color: #0f172a;">
+                    Jessé de Vasconcelos Júnior
+                </h1>
+                <p style="margin: 0 0 10px 0; font-size: 15px; color: #0891b2; font-weight: 600;">
+                    ${t.main_headline}
+                </p>
+                <p style="margin: 0; font-size: 11.5px; color: #64748b; line-height: 1.5;">
+                    jr.jesse@gmail.com · +55 (81) 99206-3389 · linkedin.com/in/jesse-vasconcelos-37127816
+                </p>
+            </header>
+
+            <section class="visual-keep" style="margin: 0 0 18px 0; page-break-inside: avoid; break-inside: avoid;">
+                <h2 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
+                    ${t.professional_summary}
+                </h2>
+                <p style="margin: 0; font-size: 12px; line-height: 1.55; color: #334155; text-align: justify;">
+                    ${t.about_paragraph}
+                </p>
+            </section>
+
+            <section class="visual-keep" style="margin: 0 0 18px 0; page-break-inside: avoid; break-inside: avoid;">
+                <h2 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
+                    ${t.core_skills_title}
+                </h2>
+                ${coreSkillsHtml}
+            </section>
+
+            <section class="visual-keep" style="margin: 0 0 18px 0; page-break-inside: avoid; break-inside: avoid;">
+                <h2 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
+                    ${t.technical_skills}
+                </h2>
+                ${skillsHtml}
+            </section>
+
+            <section style="margin: 0 0 18px 0;">
+                <h2 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
+                    ${t.professional_experience}
+                </h2>
+                ${experienceHtml}
+            </section>
+
+            <section class="visual-keep" style="margin: 0 0 18px 0; page-break-inside: avoid; break-inside: avoid;">
+                <h2 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
+                    ${t.academic_formation}
+                </h2>
+                <div style="margin: 0 0 10px 0;">
+                    <div style="font-size: 12.5px; font-weight: 700;">${t.postgrad_title}</div>
+                    <div style="font-size: 11.5px; color: #475569;">Cesar School · ${t.postgrad_date}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12.5px; font-weight: 700;">${t.grad_title}</div>
+                    <div style="font-size: 11.5px; color: #475569;">UNICAP · ${t.grad_date}</div>
+                </div>
+            </section>
+
+            <section class="visual-keep" style="page-break-inside: avoid; break-inside: avoid;">
+                <h2 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7490;">
+                    ${t.languages_title}
+                </h2>
+                <p style="margin: 0; font-size: 12px; color: #334155; line-height: 1.5;">
+                    <strong>${t.english_level}</strong><br>
+                    ${t.reading_skill}: ${t.advanced_level} · ${t.writing_skill}: ${t.intermediate_level} · ${t.listening_skill}: ${t.advanced_level_2}
+                </p>
+            </section>
+        `;
+
+        return container;
     };
 
     const generateVisualPDF = async () => {
         const pdfBtn = document.getElementById('pdf-visual');
         const originalText = pdfBtn.innerHTML;
         let pdfContainer = null;
-        
-        // Show loading state
+
         pdfBtn.classList.add('loading');
         pdfBtn.innerHTML = `
             <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor; animation: spin 1s linear infinite;">
@@ -1329,77 +1581,39 @@ document.addEventListener('DOMContentLoaded', () => {
             </svg>
             ${translations[currentLang].pdf_generating}
         `;
-        
+
         try {
-            // Create a clone of the main content for visual PDF
-            const mainContent = document.querySelector('main').cloneNode(true);
-            
-            // Remove interactive elements from PDF
-            const elementsToRemove = mainContent.querySelectorAll('.skill-search, .modal-backdrop, .modal-content');
-            elementsToRemove.forEach(el => el.remove());
-            
-            // Mount off-screen for correct html2canvas measurement
+            const visualContent = createVisualContent();
             pdfContainer = document.createElement('div');
             pdfContainer.id = 'visual-pdf-export';
-            pdfContainer.style.cssText = `
-                position: absolute;
-                left: -9999px;
-                top: 0;
-                background: white;
-                color: black;
-                padding: 20px;
-                font-family: 'Inter', sans-serif;
-                width: 800px;
-                margin: 0;
-                box-sizing: border-box;
-            `;
-            
-            // Add header for visual PDF
-            const pdfHeader = document.createElement('div');
-            pdfHeader.style.cssText = `
-                text-align: center;
-                margin-bottom: 30px;
-                border-bottom: 2px solid #0891b2;
-                padding-bottom: 20px;
-            `;
-            pdfHeader.innerHTML = `
-                <h1 style="font-size: 28px; font-weight: bold; color: #0891b2; margin: 0 0 10px 0;">
-                    JESSÉ DE VASCONCELOS JÚNIOR
-                </h1>
-                <p style="font-size: 18px; color: #666; margin: 0;">
-                    ${translations[currentLang].main_headline}
-                </p>
-            `;
-            
-            pdfContainer.appendChild(pdfHeader);
-            pdfContainer.appendChild(mainContent);
-            document.body.appendChild(pdfContainer);
-            
-            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-            window.scrollTo(0, 0);
-            
+            pdfContainer.style.width = '794px';
+            pdfContainer.style.background = '#ffffff';
+            pdfContainer.appendChild(visualContent);
+            mountPdfNode(pdfContainer);
+            await waitForLayout();
+
             const opt = {
-                margin: [10, 10, 10, 10],
+                margin: [8, 8, 8, 8],
                 filename: `curriculo-jesse-vasconcelos-visual-${currentLang}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
+                html2canvas: {
                     scale: 2,
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: '#ffffff',
                     scrollX: 0,
-                    scrollY: 0
+                    scrollY: 0,
+                    windowWidth: 794
                 },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait' 
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
                 },
-                pagebreak: { mode: ['css', 'legacy'] }
+                pagebreak: { mode: ['css', 'legacy'], avoid: ['.visual-job', '.visual-keep'] }
             };
-            
+
             await html2pdf().set(opt).from(pdfContainer).save();
-            
         } catch (error) {
             console.error('Erro ao gerar PDF Visual:', error);
             alert(translations[currentLang].pdf_error);
@@ -1410,165 +1624,6 @@ document.addEventListener('DOMContentLoaded', () => {
             pdfBtn.classList.remove('loading');
             pdfBtn.innerHTML = originalText;
         }
-    };
-
-    // Create ATS-optimized content
-    const createATSContent = () => {
-        const container = document.createElement('div');
-        container.style.cssText = 'padding: 12px 16px 16px; margin: 0;';
-        
-        // Header Section
-        const header = document.createElement('div');
-        header.className = 'ats-keep';
-        header.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
-        header.innerHTML = `
-            <h1 style="font-size: 20px; font-weight: bold; text-align: center; margin: 0 0 6px 0; color: #000;">
-                JESSÉ DE VASCONCELOS JÚNIOR
-            </h1>
-            <p style="font-size: 14px; text-align: center; margin: 0 0 10px 0; color: #333;">
-                ${translations[currentLang].main_headline}
-            </p>
-            <div style="text-align: center; margin: 0 0 14px 0; border-bottom: 1px solid #000; padding-bottom: 8px;">
-                <p style="margin: 2px 0;">Email: jr.jesse@gmail.com</p>
-                <p style="margin: 2px 0;">WhatsApp: +55 (81) 99206-3389</p>
-                <p style="margin: 2px 0;">LinkedIn: linkedin.com/in/jesse-vasconcelos-37127816</p>
-            </div>
-        `;
-        container.appendChild(header);
-
-        // Professional Summary
-        const summary = document.createElement('div');
-        summary.className = 'ats-keep';
-        summary.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
-        summary.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${translations[currentLang].professional_summary}
-            </h2>
-            <p style="margin: 0 0 12px 0; text-align: justify;">
-                ${translations[currentLang].about_paragraph}
-            </p>
-        `;
-        container.appendChild(summary);
-
-        // Core Skills Section
-        const coreSkills = document.createElement('div');
-        coreSkills.className = 'ats-keep';
-        coreSkills.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
-        coreSkills.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${translations[currentLang].core_skills_title}
-            </h2>
-            <div style="margin-bottom: 12px;">
-                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[0]}:</strong> 20 ${translations[currentLang].years_experience}</p>
-                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[1]}:</strong> 18 ${translations[currentLang].years_experience}</p>
-                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[2]}:</strong> 15 ${translations[currentLang].years_experience}</p>
-                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[3]}:</strong> 10 ${translations[currentLang].years_experience}</p>
-                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[4]}:</strong> 8 ${translations[currentLang].years_experience}</p>
-                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[5]}:</strong> 6 ${translations[currentLang].years_experience}</p>
-            </div>
-        `;
-        container.appendChild(coreSkills);
-
-        // Technical Skills
-        const techSkills = document.createElement('div');
-        techSkills.className = 'ats-keep';
-        techSkills.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
-        let skillsText = '';
-        
-        const categoryMapping = {
-            'Back-end': 'Back-end',
-            'Front-end': 'Front-end',
-            'Banco de Dados': currentLang === 'pt' ? 'Banco de Dados' : 'Database',
-            'Analytics': 'Analytics',
-            'Cloud & DevOps': 'Cloud & DevOps',
-            'Metodologias & Ferramentas': currentLang === 'pt' ? 'Metodologias & Ferramentas' : 'Methodologies & Tools'
-        };
-        
-        Object.entries(allSkills).forEach(([category, skills]) => {
-            const translatedCategory = categoryMapping[category] || category;
-            skillsText += `<p style="margin: 2px 0;"><strong>${translatedCategory}:</strong> ${skills.join(', ')}</p>`;
-        });
-        
-        techSkills.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${translations[currentLang].technical_skills}
-            </h2>
-            <div style="margin-bottom: 12px;">
-                ${skillsText}
-            </div>
-        `;
-        container.appendChild(techSkills);
-
-        // Professional Experience
-        const experience = document.createElement('div');
-        experience.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${translations[currentLang].professional_experience}
-            </h2>
-        `;
-        
-        experienceData.forEach(item => {
-            const expDiv = document.createElement('div');
-            expDiv.className = 'ats-job';
-            expDiv.style.cssText = 'margin-bottom: 10px; page-break-inside: avoid; break-inside: avoid;';
-            expDiv.innerHTML = `
-                <h3 style="font-size: 14px; font-weight: bold; margin: 6px 0 3px 0; color: #000;">
-                    ${item.role[currentLang]} - ${item.company}
-                </h3>
-                <p style="font-style: italic; margin: 2px 0; color: #666;">
-                    ${item.period}
-                </p>
-                <ul style="margin: 6px 0; padding-left: 18px;">
-                    ${item.description[currentLang].map(desc => `<li style="margin: 2px 0;">${desc}</li>`).join('')}
-                </ul>
-                <p style="margin: 2px 0;"><strong>${translations[currentLang].tech_label}</strong> ${item.tech.join(', ')}</p>
-            `;
-            experience.appendChild(expDiv);
-        });
-        container.appendChild(experience);
-
-        // Education
-        const education = document.createElement('div');
-        education.className = 'ats-keep';
-        education.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
-        education.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${translations[currentLang].academic_formation}
-            </h2>
-            <div style="margin-bottom: 12px;">
-                <h3 style="font-size: 14px; font-weight: bold; margin: 6px 0 3px 0; color: #000;">
-                    ${translations[currentLang].postgrad_title}
-                </h3>
-                <p style="margin: 2px 0;">Cesar School</p>
-                <p style="margin: 2px 0; font-style: italic;">${translations[currentLang].postgrad_date}</p>
-                
-                <h3 style="font-size: 14px; font-weight: bold; margin: 10px 0 3px 0; color: #000;">
-                    ${translations[currentLang].grad_title}
-                </h3>
-                <p style="margin: 2px 0;">UNICAP</p>
-                <p style="margin: 2px 0; font-style: italic;">${translations[currentLang].grad_date}</p>
-            </div>
-        `;
-        container.appendChild(education);
-
-        // Languages
-        const languages = document.createElement('div');
-        languages.className = 'ats-keep';
-        languages.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
-        languages.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
-                ${translations[currentLang].languages_title}
-            </h2>
-            <div style="margin-bottom: 8px;">
-                <p style="margin: 2px 0;"><strong>${translations[currentLang].english_level}</strong></p>
-                <p style="margin: 2px 0;">${translations[currentLang].reading_skill}: ${translations[currentLang].advanced_level}</p>
-                <p style="margin: 2px 0;">${translations[currentLang].writing_skill}: ${translations[currentLang].intermediate_level}</p>
-                <p style="margin: 2px 0;">${translations[currentLang].listening_skill}: ${translations[currentLang].advanced_level_2}</p>
-            </div>
-        `;
-        container.appendChild(languages);
-
-        return container;
     };
 
     // --- Event Listeners ---
