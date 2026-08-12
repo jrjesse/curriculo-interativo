@@ -1060,20 +1060,30 @@ document.addEventListener('DOMContentLoaded', () => {
         // Translate all static text
         document.querySelectorAll('[data-translate]').forEach(el => {
             const key = el.dataset.translate;
-            if (translations[lang][key]) {
-                if(el.tagName === 'INPUT' && el.type === 'search') {
-                    el.placeholder = translations[lang][key];
+            const value = translations[lang][key];
+            if (typeof value === 'string') {
+                if (el.tagName === 'INPUT' && el.type === 'search') {
+                    el.placeholder = value;
                 } else {
-                    el.innerHTML = translations[lang][key];
+                    el.textContent = value;
                 }
+            }
+        });
+
+        document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+            const key = el.dataset.translatePlaceholder;
+            const value = translations[lang][key];
+            if (typeof value === 'string') {
+                el.placeholder = value;
             }
         });
 
         // Translate titles
         document.querySelectorAll('[data-translate-title]').forEach(el => {
             const key = el.dataset.translateTitle;
-            if (translations[lang][key]) {
-                el.title = translations[lang][key];
+            const value = translations[lang][key];
+            if (typeof value === 'string') {
+                el.title = value;
             }
         });
         
@@ -1147,11 +1157,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <p class="text-sm text-slate-500 mb-4">${data.period}</p>
                 <ul class="space-y-3 text-slate-600 list-disc list-inside mb-4">
-                    ${data.description[currentLang].map(d => `<li>${d}</li>`).join('')}
+                    ${data.description[currentLang].map(d => `<li>${typeof d === 'string' ? d : ''}</li>`).join('')}
                 </ul>
                 <h5 class="font-semibold text-slate-800 mt-6 mb-2">${translations[currentLang].tech_label}</h5>
                 <div class="flex flex-wrap gap-2">
-                    ${data.tech.map(t => `<span class="bg-cyan-50 text-cyan-800 text-xs font-medium px-2.5 py-1 rounded-full">${t}</span>`).join('')}
+                    ${data.tech.map(t => `<span class="bg-cyan-50 text-cyan-800 text-xs font-medium px-2.5 py-1 rounded-full">${typeof t === 'string' ? t : ''}</span>`).join('')}
                 </div>
             `;
         }
@@ -1353,37 +1363,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 style: 'body'
             }));
 
-            const experienceBlocks = experienceData.flatMap((item) => {
-                const bullets = item.description[currentLang].map((desc) => ({
-                    text: desc,
-                    margin: [0, 1, 0, 1]
-                }));
-                return [
-                    {
-                        text: `${item.role[currentLang]} | ${item.company}`,
-                        style: 'jobTitle',
-                        margin: [0, 8, 0, 1]
-                    },
-                    {
-                        text: localizePeriod(item.period),
-                        style: 'muted',
-                        margin: [0, 0, 0, 2]
-                    },
-                    {
-                        ul: bullets,
-                        style: 'body',
-                        margin: [0, 0, 0, 2]
-                    },
-                    {
-                        text: [
-                            { text: `${t.tech_label} `, bold: true },
-                            item.tech.map(localizeSkillName).join(', ')
-                        ],
-                        style: 'body',
-                        margin: [0, 0, 0, 2]
-                    }
-                ];
-            });
+            const experienceBlocks = experienceData.flatMap((item) => [
+                {
+                    text: `${item.role[currentLang]} | ${item.company}`,
+                    style: 'jobTitle',
+                    margin: [0, 8, 0, 1]
+                },
+                {
+                    text: localizePeriod(item.period),
+                    style: 'muted',
+                    margin: [0, 0, 0, 2]
+                },
+                {
+                    ul: item.description[currentLang].map((desc) => String(desc)),
+                    style: 'body',
+                    margin: [0, 0, 0, 2]
+                },
+                {
+                    text: [
+                        { text: `${t.tech_label} `, bold: true },
+                        item.tech.map(localizeSkillName).join(', ')
+                    ],
+                    style: 'body',
+                    margin: [0, 0, 0, 2]
+                }
+            ]);
 
             const coreLines = coreSkillRows().map((row) => ({
                 text: [
@@ -1520,7 +1524,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ]
                     },
                     {
-                        ul: item.description[currentLang],
+                        ul: item.description[currentLang].map((desc) => String(desc)),
                         style: 'vBody',
                         margin: [0, 4, 0, 3]
                     },
