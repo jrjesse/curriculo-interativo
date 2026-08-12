@@ -1461,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             };
 
-            await downloadPdfMake(docDefinition, `curriculo-jesse-vasconcelos-ats-${currentLang}.pdf`);
+            await downloadPdfMake(docDefinition, `curriculo-jesse-vasconcelos-ats_${currentLang}.pdf`);
         } catch (error) {
             console.error('Erro ao gerar PDF ATS:', error);
             alert(translations[currentLang].pdf_error);
@@ -1606,7 +1606,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             };
 
-            await downloadPdfMake(docDefinition, `curriculo-jesse-vasconcelos-visual-${currentLang}.pdf`);
+            await downloadPdfMake(docDefinition, `curriculo-jesse-vasconcelos-visual_${currentLang}.pdf`);
         } catch (error) {
             console.error('Erro ao gerar PDF Visual:', error);
             alert(translations[currentLang].pdf_error);
