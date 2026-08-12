@@ -1236,6 +1236,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateATSPDF = async () => {
         const pdfBtn = document.getElementById('pdf-ats');
         const originalText = pdfBtn.innerHTML;
+        let pdfContainer = null;
         
         // Show loading state
         pdfBtn.classList.add('loading');
@@ -1250,52 +1251,66 @@ document.addEventListener('DOMContentLoaded', () => {
             // Create ATS-optimized PDF content
             const atsContent = createATSContent();
             
-            // Create PDF container with ATS-friendly styling
-            const pdfContainer = document.createElement('div');
+            // Mount off-screen so html2canvas can measure height correctly
+            // (detached nodes often produce blank first pages, worse with longer PT text)
+            pdfContainer = document.createElement('div');
+            pdfContainer.id = 'ats-pdf-export';
             pdfContainer.style.cssText = `
-                background: white;
-                color: black;
-                padding: 15px;
-                font-family: 'Arial, sans-serif';
+                position: absolute;
+                left: -9999px;
+                top: 0;
+                background: #ffffff;
+                color: #000000;
+                padding: 0;
+                font-family: Arial, Helvetica, sans-serif;
                 font-size: 11px;
-                line-height: 1.3;
-                width: 800px;
+                line-height: 1.35;
+                width: 794px;
                 margin: 0;
                 box-sizing: border-box;
+                overflow: visible;
             `;
             
             pdfContainer.appendChild(atsContent);
+            document.body.appendChild(pdfContainer);
             
-            // Configure PDF options for ATS compatibility
+            // Let the browser finish layout before capture
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            window.scrollTo(0, 0);
+            
             const opt = {
-                margin: [10, 10, 10, 10],
+                margin: [8, 10, 8, 10],
                 filename: `curriculo-jesse-vasconcelos-ats-${currentLang}.pdf`,
                 image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: { 
-                    scale: 1,
+                    scale: 1.5,
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: '#ffffff',
                     logging: false,
-                    width: 800,
-                    height: undefined
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: 794
                 },
                 jsPDF: { 
                     unit: 'mm', 
                     format: 'a4', 
                     orientation: 'portrait',
                     compress: true
-                }
+                },
+                // avoid-all causes blank pages when a block is taller than one page
+                pagebreak: { mode: ['css', 'legacy'], avoid: ['.ats-job', '.ats-keep'] }
             };
             
-            // Generate PDF
             await html2pdf().set(opt).from(pdfContainer).save();
             
         } catch (error) {
             console.error('Erro ao gerar PDF ATS:', error);
             alert(translations[currentLang].pdf_error);
         } finally {
-            // Restore button state
+            if (pdfContainer && pdfContainer.parentNode) {
+                pdfContainer.parentNode.removeChild(pdfContainer);
+            }
             pdfBtn.classList.remove('loading');
             pdfBtn.innerHTML = originalText;
         }
@@ -1304,6 +1319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateVisualPDF = async () => {
         const pdfBtn = document.getElementById('pdf-visual');
         const originalText = pdfBtn.innerHTML;
+        let pdfContainer = null;
         
         // Show loading state
         pdfBtn.classList.add('loading');
@@ -1322,15 +1338,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const elementsToRemove = mainContent.querySelectorAll('.skill-search, .modal-backdrop, .modal-content');
             elementsToRemove.forEach(el => el.remove());
             
-            // Create PDF container with visual styling
-            const pdfContainer = document.createElement('div');
+            // Mount off-screen for correct html2canvas measurement
+            pdfContainer = document.createElement('div');
+            pdfContainer.id = 'visual-pdf-export';
             pdfContainer.style.cssText = `
+                position: absolute;
+                left: -9999px;
+                top: 0;
                 background: white;
                 color: black;
                 padding: 20px;
                 font-family: 'Inter', sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
+                width: 800px;
+                margin: 0;
+                box-sizing: border-box;
             `;
             
             // Add header for visual PDF
@@ -1352,8 +1373,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             pdfContainer.appendChild(pdfHeader);
             pdfContainer.appendChild(mainContent);
+            document.body.appendChild(pdfContainer);
             
-            // Configure PDF options for visual quality
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            window.scrollTo(0, 0);
+            
             const opt = {
                 margin: [10, 10, 10, 10],
                 filename: `curriculo-jesse-vasconcelos-visual-${currentLang}.pdf`,
@@ -1362,23 +1386,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     scale: 2,
                     useCORS: true,
                     allowTaint: true,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    scrollX: 0,
+                    scrollY: 0
                 },
                 jsPDF: { 
                     unit: 'mm', 
                     format: 'a4', 
                     orientation: 'portrait' 
-                }
+                },
+                pagebreak: { mode: ['css', 'legacy'] }
             };
             
-            // Generate PDF
             await html2pdf().set(opt).from(pdfContainer).save();
             
         } catch (error) {
             console.error('Erro ao gerar PDF Visual:', error);
             alert(translations[currentLang].pdf_error);
         } finally {
-            // Restore button state
+            if (pdfContainer && pdfContainer.parentNode) {
+                pdfContainer.parentNode.removeChild(pdfContainer);
+            }
             pdfBtn.classList.remove('loading');
             pdfBtn.innerHTML = originalText;
         }
@@ -1387,31 +1415,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create ATS-optimized content
     const createATSContent = () => {
         const container = document.createElement('div');
+        container.style.cssText = 'padding: 12px 16px 16px; margin: 0;';
         
         // Header Section
         const header = document.createElement('div');
+        header.className = 'ats-keep';
+        header.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
         header.innerHTML = `
-            <h1 style="font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 8px; color: #000;">
+            <h1 style="font-size: 20px; font-weight: bold; text-align: center; margin: 0 0 6px 0; color: #000;">
                 JESSÉ DE VASCONCELOS JÚNIOR
             </h1>
-            <p style="font-size: 14px; text-align: center; margin-bottom: 15px; color: #333;">
+            <p style="font-size: 14px; text-align: center; margin: 0 0 10px 0; color: #333;">
                 ${translations[currentLang].main_headline}
             </p>
-            <div style="text-align: center; margin-bottom: 20px; border-bottom: 1px solid #000; padding-bottom: 8px;">
-                <p style="margin: 3px 0;">Email: jr.jesse@gmail.com</p>
-                <p style="margin: 3px 0;">WhatsApp: +55 (81) 99206-3389</p>
-                <p style="margin: 3px 0;">LinkedIn: linkedin.com/in/jesse-vasconcelos-37127816</p>
+            <div style="text-align: center; margin: 0 0 14px 0; border-bottom: 1px solid #000; padding-bottom: 8px;">
+                <p style="margin: 2px 0;">Email: jr.jesse@gmail.com</p>
+                <p style="margin: 2px 0;">WhatsApp: +55 (81) 99206-3389</p>
+                <p style="margin: 2px 0;">LinkedIn: linkedin.com/in/jesse-vasconcelos-37127816</p>
             </div>
         `;
         container.appendChild(header);
 
         // Professional Summary
         const summary = document.createElement('div');
+        summary.className = 'ats-keep';
+        summary.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
         summary.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
+            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
                 ${translations[currentLang].professional_summary}
             </h2>
-            <p style="margin-bottom: 15px; text-align: justify;">
+            <p style="margin: 0 0 12px 0; text-align: justify;">
                 ${translations[currentLang].about_paragraph}
             </p>
         `;
@@ -1419,45 +1452,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Core Skills Section
         const coreSkills = document.createElement('div');
+        coreSkills.className = 'ats-keep';
+        coreSkills.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
         coreSkills.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
+            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
                 ${translations[currentLang].core_skills_title}
             </h2>
-            <div style="margin-bottom: 15px;">
-                <p><strong>${translations[currentLang].chart_categories[0]}:</strong> 20 ${translations[currentLang].years_experience}</p>
-                <p><strong>${translations[currentLang].chart_categories[1]}:</strong> 18 ${translations[currentLang].years_experience}</p>
-                <p><strong>${translations[currentLang].chart_categories[2]}:</strong> 15 ${translations[currentLang].years_experience}</p>
-                <p><strong>${translations[currentLang].chart_categories[3]}:</strong> 10 ${translations[currentLang].years_experience}</p>
-                <p><strong>${translations[currentLang].chart_categories[4]}:</strong> 8 ${translations[currentLang].years_experience}</p>
-                <p><strong>${translations[currentLang].chart_categories[5]}:</strong> 6 ${translations[currentLang].years_experience}</p>
+            <div style="margin-bottom: 12px;">
+                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[0]}:</strong> 20 ${translations[currentLang].years_experience}</p>
+                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[1]}:</strong> 18 ${translations[currentLang].years_experience}</p>
+                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[2]}:</strong> 15 ${translations[currentLang].years_experience}</p>
+                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[3]}:</strong> 10 ${translations[currentLang].years_experience}</p>
+                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[4]}:</strong> 8 ${translations[currentLang].years_experience}</p>
+                <p style="margin: 2px 0;"><strong>${translations[currentLang].chart_categories[5]}:</strong> 6 ${translations[currentLang].years_experience}</p>
             </div>
         `;
         container.appendChild(coreSkills);
 
         // Technical Skills
         const techSkills = document.createElement('div');
+        techSkills.className = 'ats-keep';
+        techSkills.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
         let skillsText = '';
         
-        // Mapeamento de categorias para português
         const categoryMapping = {
-            'Back-end': currentLang === 'pt' ? 'Back-end' : 'Back-end',
-            'Front-end': currentLang === 'pt' ? 'Front-end' : 'Front-end',
+            'Back-end': 'Back-end',
+            'Front-end': 'Front-end',
             'Banco de Dados': currentLang === 'pt' ? 'Banco de Dados' : 'Database',
-            'Analytics': currentLang === 'pt' ? 'Analytics' : 'Analytics',
-            'Cloud & DevOps': currentLang === 'pt' ? 'Cloud & DevOps' : 'Cloud & DevOps',
+            'Analytics': 'Analytics',
+            'Cloud & DevOps': 'Cloud & DevOps',
             'Metodologias & Ferramentas': currentLang === 'pt' ? 'Metodologias & Ferramentas' : 'Methodologies & Tools'
         };
         
         Object.entries(allSkills).forEach(([category, skills]) => {
             const translatedCategory = categoryMapping[category] || category;
-            skillsText += `<p><strong>${translatedCategory}:</strong> ${skills.join(', ')}</p>`;
+            skillsText += `<p style="margin: 2px 0;"><strong>${translatedCategory}:</strong> ${skills.join(', ')}</p>`;
         });
         
         techSkills.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
+            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
                 ${translations[currentLang].technical_skills}
             </h2>
-            <div style="margin-bottom: 15px;">
+            <div style="margin-bottom: 12px;">
                 ${skillsText}
             </div>
         `;
@@ -1466,63 +1502,68 @@ document.addEventListener('DOMContentLoaded', () => {
         // Professional Experience
         const experience = document.createElement('div');
         experience.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
+            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
                 ${translations[currentLang].professional_experience}
             </h2>
         `;
         
         experienceData.forEach(item => {
             const expDiv = document.createElement('div');
-            expDiv.style.marginBottom = '12px';
-                            expDiv.innerHTML = `
-                    <h3 style="font-size: 14px; font-weight: bold; margin: 8px 0 4px 0; color: #000;">
-                        ${item.role[currentLang]} - ${item.company}
-                    </h3>
-                    <p style="font-style: italic; margin: 3px 0; color: #666;">
-                        ${item.period}
-                    </p>
-                    <ul style="margin: 8px 0; padding-left: 20px;">
-                        ${item.description[currentLang].map(desc => `<li style="margin: 3px 0;">${desc}</li>`).join('')}
-                    </ul>
-                    <p style="margin: 3px 0;"><strong>${translations[currentLang].tech_label}</strong> ${item.tech.join(', ')}</p>
-                `;
+            expDiv.className = 'ats-job';
+            expDiv.style.cssText = 'margin-bottom: 10px; page-break-inside: avoid; break-inside: avoid;';
+            expDiv.innerHTML = `
+                <h3 style="font-size: 14px; font-weight: bold; margin: 6px 0 3px 0; color: #000;">
+                    ${item.role[currentLang]} - ${item.company}
+                </h3>
+                <p style="font-style: italic; margin: 2px 0; color: #666;">
+                    ${item.period}
+                </p>
+                <ul style="margin: 6px 0; padding-left: 18px;">
+                    ${item.description[currentLang].map(desc => `<li style="margin: 2px 0;">${desc}</li>`).join('')}
+                </ul>
+                <p style="margin: 2px 0;"><strong>${translations[currentLang].tech_label}</strong> ${item.tech.join(', ')}</p>
+            `;
             experience.appendChild(expDiv);
         });
         container.appendChild(experience);
 
         // Education
         const education = document.createElement('div');
+        education.className = 'ats-keep';
+        education.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
         education.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
+            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
                 ${translations[currentLang].academic_formation}
             </h2>
-            <div style="margin-bottom: 15px;">
-                <h3 style="font-size: 14px; font-weight: bold; margin: 8px 0 4px 0; color: #000;">
+            <div style="margin-bottom: 12px;">
+                <h3 style="font-size: 14px; font-weight: bold; margin: 6px 0 3px 0; color: #000;">
                     ${translations[currentLang].postgrad_title}
                 </h3>
-                <p style="margin: 3px 0;">Cesar School</p>
-                <p style="margin: 3px 0; font-style: italic;">${translations[currentLang].postgrad_date}</p>
+                <p style="margin: 2px 0;">Cesar School</p>
+                <p style="margin: 2px 0; font-style: italic;">${translations[currentLang].postgrad_date}</p>
                 
-                <h3 style="font-size: 14px; font-weight: bold; margin: 12px 0 4px 0; color: #000;">
+                <h3 style="font-size: 14px; font-weight: bold; margin: 10px 0 3px 0; color: #000;">
                     ${translations[currentLang].grad_title}
                 </h3>
-                <p style="margin: 3px 0;">UNICAP</p>
-                <p style="margin: 3px 0; font-style: italic;">${translations[currentLang].grad_date}</p>
+                <p style="margin: 2px 0;">UNICAP</p>
+                <p style="margin: 2px 0; font-style: italic;">${translations[currentLang].grad_date}</p>
             </div>
         `;
         container.appendChild(education);
 
         // Languages
         const languages = document.createElement('div');
+        languages.className = 'ats-keep';
+        languages.style.cssText = 'page-break-inside: avoid; break-inside: avoid;';
         languages.innerHTML = `
-            <h2 style="font-size: 16px; font-weight: bold; margin: 15px 0 8px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
+            <h2 style="font-size: 16px; font-weight: bold; margin: 10px 0 6px 0; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px;">
                 ${translations[currentLang].languages_title}
             </h2>
-            <div style="margin-bottom: 15px;">
-                <p><strong>${translations[currentLang].english_level}</strong></p>
-                <p>${translations[currentLang].reading_skill}: ${translations[currentLang].advanced_level}</p>
-                <p>${translations[currentLang].writing_skill}: ${translations[currentLang].intermediate_level}</p>
-                <p>${translations[currentLang].listening_skill}: ${translations[currentLang].advanced_level_2}</p>
+            <div style="margin-bottom: 8px;">
+                <p style="margin: 2px 0;"><strong>${translations[currentLang].english_level}</strong></p>
+                <p style="margin: 2px 0;">${translations[currentLang].reading_skill}: ${translations[currentLang].advanced_level}</p>
+                <p style="margin: 2px 0;">${translations[currentLang].writing_skill}: ${translations[currentLang].intermediate_level}</p>
+                <p style="margin: 2px 0;">${translations[currentLang].listening_skill}: ${translations[currentLang].advanced_level_2}</p>
             </div>
         `;
         container.appendChild(languages);
