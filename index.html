@@ -1282,10 +1282,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     };
 
+    const buildPdfFilename = (kind) => {
+        const lang = currentLang === 'en' ? 'en' : 'pt';
+        return `curriculo-jesse-vasconcelos-${kind}_${lang}.pdf`;
+    };
+
+    const kindFromFilename = (filename) => {
+        if (filename.includes('-ats_')) return 'ATS Resume';
+        if (filename.includes('-visual_')) return 'Visual Resume';
+        return 'Resume';
+    };
+
     const downloadPdfMake = (docDefinition, filename) =>
         new Promise((resolve, reject) => {
             try {
-                pdfMake.createPdf(docDefinition).download(filename, resolve);
+                const pdf = pdfMake.createPdf({
+                    ...docDefinition,
+                    info: {
+                        ...(docDefinition.info || {}),
+                        title: filename.replace(/\.pdf$/i, ''),
+                        author: 'Jessé de Vasconcelos Júnior',
+                        subject: kindFromFilename(filename)
+                    }
+                });
+
+                // Force explicit filename via <a download> (more reliable than FileSaver defaults)
+                pdf.getBlob((blob) => {
+                    try {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        setTimeout(() => URL.revokeObjectURL(url), 2000);
+                        resolve();
+                    } catch (err) {
+                        pdf.download(filename, resolve);
+                    }
+                });
             } catch (err) {
                 reject(err);
             }
@@ -1465,7 +1502,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             };
 
-            await downloadPdfMake(docDefinition, `curriculo-jesse-vasconcelos-ats_${currentLang}.pdf`);
+            await downloadPdfMake(docDefinition, buildPdfFilename('ats'));
         } catch (error) {
             console.error('Erro ao gerar PDF ATS:', error);
             alert(translations[currentLang].pdf_error);
@@ -1610,7 +1647,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             };
 
-            await downloadPdfMake(docDefinition, `curriculo-jesse-vasconcelos-visual_${currentLang}.pdf`);
+            await downloadPdfMake(docDefinition, buildPdfFilename('visual'));
         } catch (error) {
             console.error('Erro ao gerar PDF Visual:', error);
             alert(translations[currentLang].pdf_error);
