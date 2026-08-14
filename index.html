@@ -394,6 +394,7 @@
                     <a href="#sobre" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_about">Sobre</a>
                     <a href="#habilidades" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_skills">Habilidades</a>
                     <a href="#experiencia" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_experience">Experiência</a>
+                    <a href="#projetos" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_projects">Projetos</a>
                     <a href="#educacao" class="text-slate-600 hover:text-cyan-600 transition" data-translate="nav_education">Educação</a>
                 </div>
                 <div class="controls-container">
@@ -482,6 +483,14 @@
                 <input type="search" id="skill-search" class="w-full max-w-lg mx-auto p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-cyan-500 focus:outline-none transition" data-translate-placeholder="skill_search_placeholder">
             </div>
             <div id="skills-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+        </section>
+
+        <section id="projetos" class="mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-900 mb-2" data-translate="projects_title">Projetos em Destaque</h3>
+                <p class="text-slate-600 max-w-3xl mx-auto" data-translate="projects_subtitle">Seleção de projetos próprios e entregas técnicas com impacto operacional e de produto.</p>
+            </div>
+            <div id="projects-grid" class="grid md:grid-cols-2 gap-6"></div>
         </section>
 
         <section id="educacao" class="bg-white p-12 rounded-xl shadow-lg border border-slate-200/50">
@@ -617,6 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nav_about: "Sobre",
             nav_skills: "Habilidades",
             nav_experience: "Experiência",
+            nav_projects: "Projetos",
             nav_education: "Educação",
             main_headline: "Engenheiro de Software Sênior",
             about_paragraph: "Engenheiro de Software com mais de 20 anos de experiência, especializado em arquitetura de sistemas e engenharia e análise de dados, desenvolvimento e sustentação, com forte atuação nos setores de Varejo, Indústria e Sistema Financeiro. Proficiência em gestão de equipes ágeis, integração de produtos e gestão de fornecedores. Experiência comprovada em migração para Cloud (AWS, Azure, OCI) e adoção de novas tecnologias. Adaptabilidade e comunicação eficazes, com foco em gerenciamento de projetos (Scrum, PMI) e gestão de tempo. Capacidade de desenvolver e capacitar membros da equipe através de contratação, treinamentos e feedbacks 1:1, alinhando profissionais aos objetivos técnicos da corporação.",
@@ -657,14 +667,19 @@ document.addEventListener('DOMContentLoaded', () => {
             professional_summary: "RESUMO PROFISSIONAL",
             technical_skills: "COMPETÊNCIAS TÉCNICAS",
             professional_experience: "EXPERIÊNCIA PROFISSIONAL",
+            projects_section: "PROJETOS",
             academic_formation: "FORMAÇÃO ACADÊMICA",
-            years_experience: "anos de experiência"
+            years_experience: "anos de experiência",
+            projects_title: "Projetos em Destaque",
+            projects_subtitle: "Seleção de projetos próprios e entregas técnicas com impacto operacional e de produto.",
+            project_view: "Ver no GitHub"
         },
         en: {
             page_title: "Interactive Resume | Jessé de Vasconcelos Júnior",
             nav_about: "About",
             nav_skills: "Skills",
             nav_experience: "Experience",
+            nav_projects: "Projects",
             nav_education: "Education",
             main_headline: "Senior Software Engineer",
             about_paragraph: "Software Engineer with over 20 years of experience, specializing in systems architecture, data engineering and analysis, development, and support, with a strong background in Retail, Industry, and Financial Systems sectors. Proficient in agile team management, product integration, and vendor management. Proven experience in cloud migration (AWS, Azure, OCI) and adoption of new technologies. Effective adaptability and communication, with a focus on project management (Scrum, PMI) and time management. Ability to develop and train team members through hiring, training, and 1:1 feedback, aligning professionals with the corporation's technical objectives.",
@@ -705,10 +720,106 @@ document.addEventListener('DOMContentLoaded', () => {
             professional_summary: "PROFESSIONAL SUMMARY",
             technical_skills: "TECHNICAL SKILLS",
             professional_experience: "PROFESSIONAL EXPERIENCE",
+            projects_section: "PROJECTS",
             academic_formation: "EDUCATION",
-            years_experience: "years of experience"
+            years_experience: "years of experience",
+            projects_title: "Featured Projects",
+            projects_subtitle: "Selected personal and technical deliveries with operational and product impact.",
+            project_view: "View on GitHub"
         }
     };
+
+    const projectsData = [
+        {
+            id: 'itsm-dashboard',
+            name: {
+                pt: 'ITSM Diagnostic Dashboard',
+                en: 'ITSM Diagnostic Dashboard'
+            },
+            summary: {
+                pt: 'Dashboard diagnóstico de ITSM para análise de KPIs, desperdícios e retrabalho, oportunidades de redução de custo (capacidade), maturidade operacional das squads, riscos de SLA (proxies) e de negócio, qualidade da integração Freshservice × Jira, sistemas com maior recorrência (Problem Management), candidatos a automação e ações priorizadas (impacto × esforço).',
+                en: 'ITSM diagnostic dashboard for KPI analysis, waste and rework, cost-reduction opportunities (capacity), squad operational maturity, SLA proxy and business risks, Freshservice × Jira integration quality, systems with highest recurrence (Problem Management), automation candidates, and prioritized actions (impact × effort).'
+            },
+            highlights: {
+                pt: [
+                    'Análise de KPIs, desperdícios e retrabalho',
+                    'Oportunidades de redução de custo (capacidade)',
+                    'Maturidade operacional das squads',
+                    'Riscos de SLA (proxies) e de negócio',
+                    'Qualidade da integração Freshservice × Jira',
+                    'Sistemas com maior recorrência (Problem Management)',
+                    'Candidatos a automação',
+                    'Ações priorizadas (impacto × esforço)'
+                ],
+                en: [
+                    'KPI, waste, and rework analysis',
+                    'Cost-reduction opportunities (capacity)',
+                    'Squad operational maturity',
+                    'SLA proxy and business risks',
+                    'Freshservice × Jira integration quality',
+                    'Highest-recurrence systems (Problem Management)',
+                    'Automation candidates',
+                    'Prioritized actions (impact × effort)'
+                ]
+            },
+            tech: ['ITSM', 'Freshservice', 'Jira', 'Analytics', 'Dashboards', 'Problem Management'],
+            url: null
+        },
+        {
+            id: 'framework-ia',
+            name: {
+                pt: 'Framework de Adoção de IA no SDLC',
+                en: 'AI Adoption Framework for the SDLC'
+            },
+            summary: {
+                pt: 'Aplicativo interativo (Tech Leads Club) para diagnosticar, planejar e governar a adoção de IA no ciclo de desenvolvimento, com jornada em 7 fases e parecer técnico gerado por Gemini.',
+                en: 'Interactive Tech Leads Club app to diagnose, plan, and govern AI adoption across the software delivery lifecycle, with a 7-phase journey and Gemini-generated technical guidance.'
+            },
+            highlights: {
+                pt: [
+                    'Diagnóstico de maturidade L0–L3',
+                    'Seleção de time piloto e ferramentas',
+                    'Playbook SDLC e governança (OWASP LLM)',
+                    'Parecer técnico personalizado via Gemini'
+                ],
+                en: [
+                    'Maturity diagnosis L0–L3',
+                    'Pilot team and tool selection',
+                    'SDLC playbook and governance (OWASP LLM)',
+                    'Personalized technical brief via Gemini'
+                ]
+            },
+            tech: ['React 19', 'TypeScript', 'Tailwind CSS', 'Node.js', 'Express', 'Gemini'],
+            url: 'https://github.com/jrjesse/framework-de-ado-o-de-ia'
+        },
+        {
+            id: 'curriculo-interativo',
+            name: {
+                pt: 'Currículo Interativo',
+                en: 'Interactive Resume'
+            },
+            summary: {
+                pt: 'Currículo web bilíngue (PT/EN) com tema claro/escuro, timeline de experiência, gráfico de skills e exportação de PDF ATS (texto selecionável) e Visual.',
+                en: 'Bilingual (PT/EN) web resume with light/dark theme, experience timeline, skills chart, and ATS (selectable text) plus Visual PDF export.'
+            },
+            highlights: {
+                pt: [
+                    'i18n PT/EN com preferências persistidas',
+                    'PDF ATS com camada de texto (pdfmake)',
+                    'PDF Visual com layout humano',
+                    'Deploy contínuo via GitHub Pages'
+                ],
+                en: [
+                    'PT/EN i18n with persisted preferences',
+                    'ATS PDF with text layer (pdfmake)',
+                    'Human-oriented Visual PDF',
+                    'Continuous deploy via GitHub Pages'
+                ]
+            },
+            tech: ['HTML', 'JavaScript', 'Chart.js', 'pdfmake', 'GitHub Pages'],
+            url: 'https://github.com/jrjesse/curriculo-interativo'
+        }
+    ];
 
     const experienceData = [
        {
@@ -1102,6 +1213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSkillsChart();
         renderTimeline();
         renderSkillsGrid();
+        renderProjects();
 
         // If an experience was selected, re-render its details
         if(selectedExperienceId) {
@@ -1216,7 +1328,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
-    }
+    };
+
+    const renderProjects = () => {
+        const projectsGrid = document.getElementById('projects-grid');
+        if (!projectsGrid) return;
+        projectsGrid.innerHTML = '';
+        const t = translations[currentLang];
+
+        projectsData.forEach((project) => {
+            const card = document.createElement('article');
+            card.className = 'bg-white p-6 rounded-xl shadow-lg border border-slate-200/50 text-left h-full flex flex-col';
+            const highlights = project.highlights[currentLang]
+                .map((item) => `<li class="text-sm text-slate-600">${item}</li>`)
+                .join('');
+            const techTags = project.tech
+                .map((tech) => `<span class="bg-cyan-50 text-cyan-800 text-xs font-medium px-2.5 py-1 rounded-full">${tech}</span>`)
+                .join('');
+            const linkHtml = project.url
+                ? `<a href="${project.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-cyan-700 font-semibold hover:text-cyan-800 transition mt-4">${t.project_view} →</a>`
+                : '';
+
+            card.innerHTML = `
+                <h4 class="text-xl font-bold text-slate-900 mb-2">${project.name[currentLang]}</h4>
+                <p class="text-slate-600 mb-4">${project.summary[currentLang]}</p>
+                <ul class="space-y-1.5 list-disc list-inside mb-4 flex-1">
+                    ${highlights}
+                </ul>
+                <div class="flex flex-wrap gap-2 mb-1">${techTags}</div>
+                ${linkHtml}
+            `;
+            projectsGrid.appendChild(card);
+        });
+    };
 
     // --- Modal Logic ---
     const contactBtn = document.getElementById('contact-btn');
@@ -1475,6 +1619,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     section(t.professional_experience),
                     ...experienceBlocks,
 
+                    section(t.projects_section),
+                    ...projectsData.flatMap((project) => [
+                        {
+                            text: project.name[currentLang],
+                            style: 'jobTitle',
+                            margin: [0, 8, 0, 2]
+                        },
+                        {
+                            text: project.summary[currentLang],
+                            style: 'body',
+                            margin: [0, 0, 0, 2]
+                        },
+                        {
+                            ul: project.highlights[currentLang].map((item) => String(item)),
+                            style: 'body',
+                            margin: [0, 0, 0, 2]
+                        },
+                        {
+                            text: [
+                                { text: `${t.tech_label} `, bold: true },
+                                project.tech.join(', ')
+                            ],
+                            style: 'body',
+                            margin: [0, 0, 0, 2]
+                        }
+                    ]),
+
                     section(t.academic_formation),
                     {
                         text: [
@@ -1624,6 +1795,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     visualSectionTitle(t.professional_experience),
                     ...experienceBlocks,
+
+                    visualSectionTitle(t.projects_section),
+                    ...projectsData.map((project) => ({
+                        margin: [0, 0, 0, 10],
+                        stack: [
+                            { text: project.name[currentLang], style: 'vJobTitle', margin: [0, 0, 0, 2] },
+                            { text: project.summary[currentLang], style: 'vBody', margin: [0, 0, 0, 3] },
+                            {
+                                ul: project.highlights[currentLang].map((item) => String(item)),
+                                style: 'vBody',
+                                margin: [0, 0, 0, 3]
+                            },
+                            {
+                                text: [
+                                    { text: `${t.tech_label} `, bold: true, color: '#0f172a' },
+                                    { text: project.tech.join(', '), color: '#475569' }
+                                ],
+                                fontSize: 9
+                            },
+                            {
+                                canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#e2e8f0' }],
+                                margin: [0, 8, 0, 0]
+                            }
+                        ]
+                    })),
 
                     visualSectionTitle(t.academic_formation),
                     {
