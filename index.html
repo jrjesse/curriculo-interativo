@@ -215,7 +215,9 @@
             #contact-btn,
             .skill-search,
             .modal-backdrop,
-            .modal-content {
+            .modal-content,
+            #contact-modal,
+            #mindmap-modal {
                 display: none !important;
             }
             
@@ -561,6 +563,22 @@
         </div>
     </div>
 
+    <!-- SDLC Mind Map Modal -->
+    <div id="mindmap-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <div id="mindmap-backdrop" class="absolute inset-0 bg-black/50 modal-backdrop opacity-0"></div>
+        <div id="mindmap-content" class="relative bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] mx-auto modal-content transform scale-95 opacity-0 flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-200 shrink-0">
+                <h3 class="text-lg md:text-xl font-bold text-slate-900" data-translate="mindmap_modal_title">Mapa Mental — Ciclo de Desenvolvimento (SDLC)</h3>
+                <button id="close-mindmap-btn" class="text-slate-500 hover:text-slate-800 p-1" aria-label="Close">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="overflow-auto p-4 bg-white">
+                <img id="mindmap-image" src="assets/sdlc-mindmap.svg" alt="SDLC mind map" class="w-full h-auto min-w-[640px] mx-auto block">
+            </div>
+        </div>
+    </div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -672,7 +690,9 @@ document.addEventListener('DOMContentLoaded', () => {
             years_experience: "anos de experiência",
             projects_title: "Projetos em Destaque",
             projects_subtitle: "Seleção de projetos próprios e entregas técnicas com impacto operacional e de produto.",
-            project_view: "Ver no GitHub"
+            project_view: "Ver no GitHub",
+            project_mindmap: "Ver mapa mental",
+            mindmap_modal_title: "Mapa Mental — Ciclo de Desenvolvimento (SDLC)"
         },
         en: {
             page_title: "Interactive Resume | Jessé de Vasconcelos Júnior",
@@ -725,7 +745,9 @@ document.addEventListener('DOMContentLoaded', () => {
             years_experience: "years of experience",
             projects_title: "Featured Projects",
             projects_subtitle: "Selected personal and technical deliveries with operational and product impact.",
-            project_view: "View on GitHub"
+            project_view: "View on GitHub",
+            project_mindmap: "View mind map",
+            mindmap_modal_title: "Mind Map — Software Development Lifecycle (SDLC)"
         }
     };
 
@@ -790,7 +812,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             },
             tech: ['React 19', 'TypeScript', 'Tailwind CSS', 'Node.js', 'Express', 'Gemini'],
-            url: 'https://github.com/jrjesse/framework-de-ado-o-de-ia'
+            url: 'https://github.com/jrjesse/framework-de-ado-o-de-ia',
+            mindmap: 'assets/sdlc-mindmap.svg'
         },
         {
             id: 'curriculo-interativo',
@@ -1345,9 +1368,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const techTags = project.tech
                 .map((tech) => `<span class="bg-cyan-50 text-cyan-800 text-xs font-medium px-2.5 py-1 rounded-full">${tech}</span>`)
                 .join('');
-            const linkHtml = project.url
-                ? `<a href="${project.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-cyan-700 font-semibold hover:text-cyan-800 transition mt-4">${t.project_view} →</a>`
-                : '';
+
+            const actions = [];
+            if (project.mindmap) {
+                actions.push(`<button type="button" class="project-mindmap-btn inline-flex items-center text-cyan-700 font-semibold hover:text-cyan-800 transition" data-mindmap="${project.mindmap}">${t.project_mindmap} →</button>`);
+            }
+            if (project.url) {
+                actions.push(`<a href="${project.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-cyan-700 font-semibold hover:text-cyan-800 transition">${t.project_view} →</a>`);
+            }
 
             card.innerHTML = `
                 <h4 class="text-xl font-bold text-slate-900 mb-2">${project.name[currentLang]}</h4>
@@ -1355,10 +1383,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <ul class="space-y-1.5 list-disc list-inside mb-4 flex-1">
                     ${highlights}
                 </ul>
-                <div class="flex flex-wrap gap-2 mb-1">${techTags}</div>
-                ${linkHtml}
+                <div class="flex flex-wrap gap-2 mb-3">${techTags}</div>
+                <div class="flex flex-wrap gap-x-4 gap-y-2 mt-auto">${actions.join('')}</div>
             `;
             projectsGrid.appendChild(card);
+        });
+
+        projectsGrid.querySelectorAll('.project-mindmap-btn').forEach((btn) => {
+            btn.addEventListener('click', () => openMindmapModal(btn.dataset.mindmap));
         });
     };
 
@@ -1387,6 +1419,41 @@ document.addEventListener('DOMContentLoaded', () => {
     contactBtn.addEventListener('click', openModal);
     closeModalBtn.addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', closeModal);
+
+    const mindmapModal = document.getElementById('mindmap-modal');
+    const mindmapBackdrop = document.getElementById('mindmap-backdrop');
+    const mindmapContent = document.getElementById('mindmap-content');
+    const mindmapImage = document.getElementById('mindmap-image');
+    const closeMindmapBtn = document.getElementById('close-mindmap-btn');
+
+    const openMindmapModal = (src) => {
+        if (src) mindmapImage.src = src;
+        mindmapModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+            mindmapBackdrop.classList.remove('opacity-0');
+            mindmapContent.classList.remove('opacity-0', 'scale-95');
+        }, 10);
+    };
+
+    const closeMindmapModal = () => {
+        mindmapBackdrop.classList.add('opacity-0');
+        mindmapContent.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            mindmapModal.classList.add('hidden');
+            if (contactModal.classList.contains('hidden')) {
+                document.body.style.overflow = 'auto';
+            }
+        }, 300);
+    };
+
+    closeMindmapBtn.addEventListener('click', closeMindmapModal);
+    mindmapBackdrop.addEventListener('click', closeMindmapModal);
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (!mindmapModal.classList.contains('hidden')) closeMindmapModal();
+        else if (!contactModal.classList.contains('hidden')) closeModal();
+    });
 
     // --- PDF helpers ---
     const localizePeriod = (period) => {
