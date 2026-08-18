@@ -485,6 +485,12 @@
                 <input type="search" id="skill-search" class="w-full max-w-lg mx-auto p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-cyan-500 focus:outline-none transition" data-translate-placeholder="skill_search_placeholder">
             </div>
             <div id="skills-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+            <div class="text-center mt-10">
+                <button type="button" id="skills-mindmap-btn" class="inline-flex items-center gap-1 text-cyan-700 font-semibold hover:text-cyan-800 transition bg-cyan-50 hover:bg-cyan-100 px-5 py-2.5 rounded-lg border border-cyan-200/60">
+                    <span data-translate="project_mindmap">Ver mapa mental</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+            </div>
         </section>
 
         <section id="projetos" class="mb-24">
@@ -812,8 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             },
             tech: ['React 19', 'TypeScript', 'Tailwind CSS', 'Node.js', 'Express', 'Gemini'],
-            url: 'https://github.com/jrjesse/framework-de-ado-o-de-ia',
-            mindmap: 'assets/sdlc-mindmap.svg'
+            url: 'https://github.com/jrjesse/framework-de-ado-o-de-ia'
         },
         {
             id: 'curriculo-interativo',
@@ -843,6 +848,8 @@ document.addEventListener('DOMContentLoaded', () => {
             url: 'https://github.com/jrjesse/curriculo-interativo'
         }
     ];
+
+    const SDLC_MINDMAP_SRC = 'assets/sdlc-mindmap.svg';
 
     const experienceData = [
        {
@@ -1370,9 +1377,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 .join('');
 
             const actions = [];
-            if (project.mindmap) {
-                actions.push(`<button type="button" class="project-mindmap-btn inline-flex items-center text-cyan-700 font-semibold hover:text-cyan-800 transition" data-mindmap="${project.mindmap}">${t.project_mindmap} →</button>`);
-            }
             if (project.url) {
                 actions.push(`<a href="${project.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-cyan-700 font-semibold hover:text-cyan-800 transition">${t.project_view} →</a>`);
             }
@@ -1384,13 +1388,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${highlights}
                 </ul>
                 <div class="flex flex-wrap gap-2 mb-3">${techTags}</div>
-                <div class="flex flex-wrap gap-x-4 gap-y-2 mt-auto">${actions.join('')}</div>
+                ${actions.length ? `<div class="flex flex-wrap gap-x-4 gap-y-2 mt-auto">${actions.join('')}</div>` : ''}
             `;
             projectsGrid.appendChild(card);
-        });
-
-        projectsGrid.querySelectorAll('.project-mindmap-btn').forEach((btn) => {
-            btn.addEventListener('click', () => openMindmapModal(btn.dataset.mindmap));
         });
     };
 
@@ -1449,6 +1449,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeMindmapBtn.addEventListener('click', closeMindmapModal);
     mindmapBackdrop.addEventListener('click', closeMindmapModal);
+    document.getElementById('skills-mindmap-btn').addEventListener('click', () => openMindmapModal(SDLC_MINDMAP_SRC));
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
         if (!mindmapModal.classList.contains('hidden')) closeMindmapModal();
